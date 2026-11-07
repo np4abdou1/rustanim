@@ -22,6 +22,6 @@ pub use attachable::{
 pub use mcpack::{McpackArchive, McpackError};
 pub use molang::{ExecutionContext, MolangBytecode, MolangContext, MolangEngine, MolangExpr, MolangValue};
 pub use rig::{
-    ArmorCubeInflation, BoneHierarchy, BoneTransform, CapePhysicsRig, PlayerModelType,
-    RelativePivotRig, SecondaryMotionSpring,
+    ArmorCubeInflation, BoneHierarchy, BoneTransform, CapePhysicsRig, PlayerAnimInput,
+    PlayerBonePose, PlayerModelType, PlayerPoseResult, RelativePivotRig, SecondaryMotionSpring,
 };
