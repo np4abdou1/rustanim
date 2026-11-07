@@ -401,11 +401,19 @@ impl<'a> Iterator for Lexer<'a> {
             b'\'' | b'"' => {
                 let quote = b;
                 let str_start = self.cursor;
+                let mut closed = false;
                 while let Some(sb) = self.peek_byte() {
                     self.cursor += 1;
                     if sb == quote {
+                        closed = true;
                         break;
                     }
+                }
+                if !closed {
+                    return Some(Err(format!(
+                        "Unclosed string literal starting at pos {}",
+                        start
+                    )));
                 }
                 let str_end = self.cursor - 1;
                 let content = &self.src[str_start..str_end];
@@ -848,7 +856,9 @@ impl<'a> MolangParser<'a> {
                     }
                     MolangExpr::Block(stmts)
                 } else {
-                    self.parse_expr(2)?
+                    // Use binding power 1 (instead of 2) for right-associativity
+                    // so nested ternaries (bp 2) bind cleanly inside then_branch.
+                    self.parse_expr(1)?
                 };
 
                 let else_branch = if self.peek() == &Token::Colon {
@@ -883,9 +893,11 @@ impl<'a> MolangParser<'a> {
                 let rhs = self.parse_expr(11)?;
                 let variable_name = match rhs {
                     MolangExpr::Variable(name) => name,
+                    MolangExpr::Query(name) => name,
+                    MolangExpr::QueryCall { name, .. } => name,
                     other => {
                         return Err(format!(
-                            "Expected variable name after '->', got {:?}",
+                            "Expected variable or query name after '->', got {:?}",
                             other
                         ))
                     }
@@ -2143,8 +2155,13 @@ pub struct ExecutionContext<'a> {
 
     pub anim_time: f32,
     pub delta_time: f32,
+    pub life_time: f32,
+    pub actor_count: f32,
     pub ground_speed: f32,
     pub vertical_speed: f32,
+    pub modified_move_speed: f32,
+    pub walk_distance: f32,
+    pub modified_distance_moved: f32,
     pub yaw_speed: f32,
     pub is_sneaking: bool,
     pub is_sprinting: bool,
@@ -2195,8 +2212,13 @@ impl<'a> ExecutionContext<'a> {
             entity_regs: [0.0; 64],
             anim_time: 0.0,
             delta_time: 0.05,
+            life_time: 0.0,
+            actor_count: 0.0,
             ground_speed: 0.0,
             vertical_speed: 0.0,
+            modified_move_speed: 0.0,
+            walk_distance: 0.0,
+            modified_distance_moved: 0.0,
             yaw_speed: 0.0,
             is_sneaking: false,
             is_sprinting: false,
@@ -2241,8 +2263,13 @@ impl<'a> ExecutionContext<'a> {
             entity_regs: ctx.entity_registers,
             anim_time: ctx.anim_time,
             delta_time: ctx.delta_time,
+            life_time: ctx.life_time,
+            actor_count: ctx.actor_count,
             ground_speed: ctx.ground_speed,
             vertical_speed: ctx.vertical_speed,
+            modified_move_speed: ctx.modified_move_speed,
+            walk_distance: ctx.walk_distance,
+            modified_distance_moved: ctx.modified_distance_moved,
             yaw_speed: ctx.yaw_speed,
             is_sneaking: ctx.is_sneaking,
             is_sprinting: ctx.is_sprinting,
@@ -2287,8 +2314,13 @@ impl<'a> ExecutionContext<'a> {
             entity_regs: ctx.entity_registers,
             anim_time: ctx.anim_time,
             delta_time: ctx.delta_time,
+            life_time: ctx.life_time,
+            actor_count: ctx.actor_count,
             ground_speed: ctx.ground_speed,
             vertical_speed: ctx.vertical_speed,
+            modified_move_speed: ctx.modified_move_speed,
+            walk_distance: ctx.walk_distance,
+            modified_distance_moved: ctx.modified_distance_moved,
             yaw_speed: ctx.yaw_speed,
             is_sneaking: ctx.is_sneaking,
             is_sprinting: ctx.is_sprinting,
@@ -2387,6 +2419,8 @@ impl MolangBytecode {
         let ops = &self.instructions[..];
         let code_len = ops.len();
         let mut pc = 0;
+        let mut loop_iterations: usize = 0;
+        const MAX_LOOP_ITERATIONS: usize = 10_000;
 
         while pc < code_len {
             let op = ops[pc];
@@ -2474,8 +2508,13 @@ impl MolangBytecode {
                     let val = match qid {
                         QUERY_ANIM_TIME => ctx.anim_time,
                         QUERY_DELTA_TIME => ctx.delta_time,
+                        QUERY_LIFE_TIME => ctx.life_time,
+                        QUERY_ACTOR_COUNT => ctx.actor_count,
                         QUERY_GROUND_SPEED => ctx.ground_speed,
                         QUERY_VERTICAL_SPEED => ctx.vertical_speed,
+                        QUERY_MODIFIED_MOVE_SPEED => ctx.modified_move_speed,
+                        QUERY_WALK_DISTANCE => ctx.walk_distance,
+                        QUERY_MODIFIED_DISTANCE_MOVED => ctx.modified_distance_moved,
                         QUERY_YAW_SPEED => ctx.yaw_speed,
                         QUERY_IS_SNEAKING => {
                             if ctx.is_sneaking {
@@ -2667,7 +2706,46 @@ impl MolangBytecode {
                             if let Some(ref qfn) = ctx.query_fn {
                                 qfn(other, &args_buf[..count])
                             } else {
-                                0.0
+                                match other {
+                                    QUERY_ANIM_TIME => ctx.anim_time,
+                                    QUERY_DELTA_TIME => ctx.delta_time,
+                                    QUERY_LIFE_TIME => ctx.life_time,
+                                    QUERY_ACTOR_COUNT => ctx.actor_count,
+                                    QUERY_GROUND_SPEED => ctx.ground_speed,
+                                    QUERY_VERTICAL_SPEED => ctx.vertical_speed,
+                                    QUERY_MODIFIED_MOVE_SPEED => ctx.modified_move_speed,
+                                    QUERY_WALK_DISTANCE => ctx.walk_distance,
+                                    QUERY_MODIFIED_DISTANCE_MOVED => ctx.modified_distance_moved,
+                                    QUERY_YAW_SPEED => ctx.yaw_speed,
+                                    QUERY_IS_SNEAKING => if ctx.is_sneaking { 1.0 } else { 0.0 },
+                                    QUERY_IS_SPRINTING => if ctx.is_sprinting { 1.0 } else { 0.0 },
+                                    QUERY_IS_SWIMMING => if ctx.is_swimming { 1.0 } else { 0.0 },
+                                    QUERY_IS_GLIDING => if ctx.is_gliding { 1.0 } else { 0.0 },
+                                    QUERY_IS_FIRST_PERSON | CONTEXT_IS_FIRST_PERSON => if ctx.is_first_person { 1.0 } else { 0.0 },
+                                    QUERY_IS_ON_GROUND => if ctx.is_on_ground { 1.0 } else { 0.0 },
+                                    QUERY_IS_JUMPING => if ctx.is_jumping { 1.0 } else { 0.0 },
+                                    QUERY_BODY_YAW => ctx.body_yaw,
+                                    QUERY_BODY_PITCH => ctx.body_pitch,
+                                    QUERY_HEAD_PITCH => ctx.head_pitch,
+                                    QUERY_TARGET_Y_ROTATION => ctx.target_y_rotation,
+                                    QUERY_TARGET_X_ROTATION => ctx.target_x_rotation,
+                                    QUERY_TARGET_DIST => ctx.target_dist,
+                                    QUERY_IS_CRAWLING => if ctx.is_crawling { 1.0 } else { 0.0 },
+                                    QUERY_IS_MOVING => if ctx.is_moving { 1.0 } else { 0.0 },
+                                    QUERY_IS_ON_FIRE => if ctx.is_on_fire { 1.0 } else { 0.0 },
+                                    QUERY_IS_IN_WATER => if ctx.is_in_water { 1.0 } else { 0.0 },
+                                    QUERY_ITEM_IN_USE => if ctx.item_in_use { 1.0 } else { 0.0 },
+                                    QUERY_ITEM_MAX_USE_DURATION => ctx.item_max_use_duration,
+                                    QUERY_MAIN_HAND_EMPTY => if ctx.main_hand_empty { 1.0 } else { 0.0 },
+                                    QUERY_OFF_HAND_EMPTY => if ctx.off_hand_empty { 1.0 } else { 0.0 },
+                                    QUERY_SHIELD_BLOCKING => if ctx.shield_blocking { 1.0 } else { 0.0 },
+                                    QUERY_HEALTH => ctx.health,
+                                    QUERY_MAX_HEALTH => ctx.max_health,
+                                    QUERY_HURT_TIME => ctx.hurt_time,
+                                    QUERY_IS_ALIVE => if ctx.is_alive { 1.0 } else { 0.0 },
+                                    CONTEXT_PLAYER_OFFHAND_ARM_HEIGHT => ctx.player_offhand_arm_height,
+                                    _ => 0.0,
+                                }
                             }
                         }
                     };
@@ -2765,29 +2843,59 @@ impl MolangBytecode {
                     Self::eval_math_instruction(fn_id, arg_count, ctx);
                 }
                 OpCode::Jump(target) => {
+                    if (target as usize) <= pc {
+                        loop_iterations += 1;
+                        if loop_iterations > MAX_LOOP_ITERATIONS {
+                            break;
+                        }
+                    }
                     pc = target as usize;
                 }
                 OpCode::JumpIfZero(target) => {
                     let cond = ctx.pop();
                     if cond == 0.0 {
+                        if (target as usize) <= pc {
+                            loop_iterations += 1;
+                            if loop_iterations > MAX_LOOP_ITERATIONS {
+                                break;
+                            }
+                        }
                         pc = target as usize;
                     }
                 }
                 OpCode::JumpIfNotZero(target) => {
                     let cond = ctx.pop();
                     if cond != 0.0 {
+                        if (target as usize) <= pc {
+                            loop_iterations += 1;
+                            if loop_iterations > MAX_LOOP_ITERATIONS {
+                                break;
+                            }
+                        }
                         pc = target as usize;
                     }
                 }
                 OpCode::JumpIfZeroKeep(target) => {
                     let cond = ctx.peek();
                     if cond == 0.0 {
+                        if (target as usize) <= pc {
+                            loop_iterations += 1;
+                            if loop_iterations > MAX_LOOP_ITERATIONS {
+                                break;
+                            }
+                        }
                         pc = target as usize;
                     }
                 }
                 OpCode::JumpIfNotZeroKeep(target) => {
                     let cond = ctx.peek();
                     if cond != 0.0 {
+                        if (target as usize) <= pc {
+                            loop_iterations += 1;
+                            if loop_iterations > MAX_LOOP_ITERATIONS {
+                                break;
+                            }
+                        }
                         pc = target as usize;
                     }
                 }
@@ -3071,6 +3179,12 @@ impl Compiler {
             }
             MolangStmt::Loop { count, body } => {
                 self.compile_expr(count);
+                // Clamp loop count to a safe maximum of 10,000 to prevent DoS
+                self.instructions.push(OpCode::LoadConst(10000.0));
+                self.instructions.push(OpCode::CallMath {
+                    fn_id: MathFnId::Min,
+                    arg_count: 2,
+                });
                 let loop_reg = self.intern_temp("__internal_loop_cnt");
                 self.instructions.push(OpCode::StoreTemp(loop_reg));
 
@@ -3322,8 +3436,14 @@ impl Compiler {
                 entity_target: _,
                 variable_name,
             } => {
-                let id = self.intern_var(variable_name);
-                self.instructions.push(OpCode::LoadVar(id));
+                let lower = variable_name.to_ascii_lowercase();
+                if lower.starts_with("q.") || lower.starts_with("query.") {
+                    let qid = query_id_from_name(&lower).unwrap_or(999);
+                    self.instructions.push(OpCode::LoadQuery(qid));
+                } else {
+                    let id = self.intern_var(variable_name);
+                    self.instructions.push(OpCode::LoadVar(id));
+                }
             }
             MolangExpr::MemberAccess { target, member } => {
                 self.compile_expr(target);
@@ -3683,7 +3803,14 @@ impl MolangEngine {
             MolangExpr::EntityDereference {
                 entity_target: _,
                 variable_name,
-            } => *ctx.variables.get(variable_name).unwrap_or(&0.0),
+            } => {
+                let lower = variable_name.to_ascii_lowercase();
+                if lower.starts_with("q.") || lower.starts_with("query.") {
+                    ctx.resolve_query(&lower, &[])
+                } else {
+                    *ctx.variables.get(variable_name).unwrap_or(&0.0)
+                }
+            }
             MolangExpr::MemberAccess { target, member: _ } => self.evaluate(target, ctx),
         }
     }
@@ -4026,6 +4153,470 @@ mod tests {
             allocs, 0,
             "Expected strictly 0 heap allocations during frame evaluation loop, got {}",
             allocs
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 9: Edge Cases, Query Parity, Loop Capping & Arrow Dereference
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_m2_it2_edge_cases_and_parity_hardening() {
+        let engine = MolangEngine::new();
+        let mut ctx = MolangContext::default();
+        ctx.life_time = 0.5;
+        ctx.actor_count = 12.0;
+        ctx.modified_move_speed = 1.45;
+        ctx.walk_distance = 18.2;
+        ctx.modified_distance_moved = 5.75;
+        ctx.health = 16.0;
+        ctx.body_yaw = 45.0;
+
+        // 1. Verify 5 locomotion/timeline queries in both AST and Bytecode VM
+        let queries = [
+            ("query.life_time", 0.5),
+            ("q.actor_count", 12.0),
+            ("query.modified_move_speed", 1.45),
+            ("q.walk_distance", 18.2),
+            ("query.modified_distance_moved", 5.75),
+            ("query.life_time()", 0.5),
+        ];
+
+        for (expr_str, expected) in queries {
+            let expr = engine.parse_expr(expr_str).unwrap();
+            let ast_val = engine.evaluate(&expr, &ctx);
+            let bc = engine.compile(&expr);
+            let mut exec_ctx = ExecutionContext::from_context(&mut ctx);
+            let vm_val = bc.execute(&mut exec_ctx);
+            assert!((ast_val - expected).abs() < 1e-5, "AST mismatch on {}", expr_str);
+            assert!((vm_val - expected).abs() < 1e-5, "VM mismatch on {}", expr_str);
+        }
+
+        // 2. Verify loop capping (prevents infinite loop DoS)
+        let loop_script = engine.parse("t.sum = 0; loop(1000000000, { t.sum = t.sum + 1; }); return t.sum;").unwrap();
+        let mut loop_ctx = MolangContext::default();
+        let result = engine.evaluate_script(&loop_script, &mut loop_ctx);
+        assert_eq!(result, 10000.0, "Loop iterations should cap at 10,000");
+
+        // 3. Verify nested unparenthesized ternaries right-associativity
+        let nested_ternary = "1 ? 0 ? 10 : 20 : 30";
+        let expr = engine.parse_expr(nested_ternary).unwrap();
+        assert_eq!(engine.evaluate(&expr, &ctx), 20.0);
+
+        let authentic_ternary = "1 ? 1 ? -20 : 20 : 1 ? 20 : -20";
+        let expr = engine.parse_expr(authentic_ternary).unwrap();
+        assert_eq!(engine.evaluate(&expr, &ctx), -20.0);
+
+        // 4. Verify arrow query dereference
+        let arrow_query = "c.owning_entity->q.health";
+        let expr = engine.parse_expr(arrow_query).unwrap();
+        assert_eq!(engine.evaluate(&expr, &ctx), 16.0);
+        let bc = engine.compile(&expr);
+        let mut exec_ctx = ExecutionContext::from_context(&mut ctx);
+        assert_eq!(bc.execute(&mut exec_ctx), 16.0);
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 10: Unclosed String Literal Reproducers & UTF-8 Multi-Byte Safety
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_molang_unclosed_string_reproducers() {
+        let engine = MolangEngine::new();
+
+        // Minimal reproducers identified by Challenger 1
+        let reproducers = [
+            ("\"", "single double quote"),
+            ("'", "single single quote"),
+            ("\"\"\"", "triple double quotes"),
+            ("'''", "triple single quotes"),
+            ("'🦀", "unclosed single quote before 4-byte UTF-8 emoji"),
+            ("\"€", "unclosed double quote before 3-byte UTF-8 euro"),
+            ("'unclosed string at EOF", "unclosed single quote at EOF"),
+            ("\"unclosed string at EOF", "unclosed double quote at EOF"),
+            ("\"unclosed\nwith newline", "unclosed quote across newline"),
+            ("v.slot = \"main_hand; return 1.0;", "unclosed string in statement assignment"),
+            ("q.is_gliding ? 'flight : 0.0", "unclosed string inside ternary branch"),
+            ("'🦀🦀🦀", "multiple 4-byte emojis unclosed"),
+            ("\"€€€", "multiple 3-byte characters unclosed"),
+        ];
+
+        for (input, desc) in reproducers {
+            // 1. Direct Lexer iteration: must return Err without panicking
+            let lex_res: Result<Vec<_>, _> = Lexer::new(input).collect();
+            assert!(
+                lex_res.is_err(),
+                "Lexer must return Err for {} ({:?}), got: {:?}",
+                desc, input, lex_res
+            );
+            let err_msg = lex_res.err().unwrap();
+            assert!(
+                err_msg.contains("Unclosed string literal"),
+                "Error message for {} must mention unclosed string, got: {}",
+                desc, err_msg
+            );
+
+            // 2. Engine parse_expr: must return Err without panicking
+            let parse_expr_res = engine.parse_expr(input);
+            assert!(
+                parse_expr_res.is_err(),
+                "parse_expr must return Err for {} ({:?})",
+                desc, input
+            );
+
+            // 3. Engine parse (script): must return Err without panicking
+            let parse_script_res = engine.parse(input);
+            assert!(
+                parse_script_res.is_err(),
+                "parse must return Err for {} ({:?})",
+                desc, input
+            );
+
+            // 4. Engine compile_str: must return Err without panicking
+            let compile_res = engine.compile_str(input);
+            assert!(
+                compile_res.is_err(),
+                "compile_str must return Err for {} ({:?})",
+                desc, input
+            );
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 11: Valid String Literals & Multi-Byte UTF-8 Support
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_molang_valid_string_literals() {
+        let engine = MolangEngine::new();
+
+        let valid_cases = [
+            ("\"\"", ""),
+            ("''", ""),
+            ("\"hello world\"", "hello world"),
+            ("'test string'", "test string"),
+            ("'🦀'", "🦀"),
+            ("\"€\"", "€"),
+            ("\"item:diamond_sword\"", "item:diamond_sword"),
+            ("'main_hand'", "main_hand"),
+            ("\"embedded 'single' quotes\"", "embedded 'single' quotes"),
+            ("'embedded \"double\" quotes'", "embedded \"double\" quotes"),
+            ("\"unicode 🦀 and € symbols\"", "unicode 🦀 and € symbols"),
+        ];
+
+        for (input, expected_content) in valid_cases {
+            let tokens: Vec<_> = Lexer::new(input)
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap_or_else(|e| panic!("Failed to lex valid string {:?}: {}", input, e));
+
+            assert_eq!(tokens.len(), 1, "Expected exactly 1 token for {:?}", input);
+            match &tokens[0].token {
+                Token::StringLit(content) => {
+                    assert_eq!(*content, expected_content, "Token content mismatch for {:?}", input);
+                }
+                other => panic!("Expected Token::StringLit for {:?}, got {:?}", input, other),
+            }
+
+            // Verify parse_expr produces MolangExpr::StringLiteral
+            let expr = engine.parse_expr(input).unwrap();
+            match expr {
+                MolangExpr::StringLiteral(s) => assert_eq!(s, expected_content),
+                other => panic!("Expected MolangExpr::StringLiteral, got {:?}", other),
+            }
+
+            // Verify compilation and execution evaluate to 0.0 without panic
+            let bytecode = engine.compile_str(input).unwrap();
+            let mut exec_ctx = ExecutionContext::new();
+            let res = bytecode.execute(&mut exec_ctx);
+            assert_eq!(res, 0.0);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 12: Nested Ternaries & Right-Associativity Stress Test
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_molang_nested_ternaries_and_associativity() {
+        let engine = MolangEngine::new();
+        let ctx = MolangContext::default();
+
+        // 1. Semantic verification: right-associativity a ? b : c ? d : e
+        // 0 ? 100 : (1 ? 200 : 300) == 200
+        let expr1 = engine.parse_expr("0 ? 100 : 1 ? 200 : 300").unwrap();
+        assert_eq!(engine.evaluate(&expr1, &ctx), 200.0);
+
+        // 0 ? 100 : (0 ? 200 : 300) == 300
+        let expr2 = engine.parse_expr("0 ? 100 : 0 ? 200 : 300").unwrap();
+        assert_eq!(engine.evaluate(&expr2, &ctx), 300.0);
+
+        // 2. Multi-way branching ladder with context variables
+        let ladder_src = "q.anim_time == 0.0 ? 10.0 : q.anim_time == 1.0 ? 20.0 : q.anim_time == 2.0 ? 30.0 : 40.0";
+        let ladder_code = engine.compile_str(ladder_src).unwrap();
+        let mut exec_ctx = ExecutionContext::new();
+
+        exec_ctx.anim_time = 0.0;
+        assert_eq!(ladder_code.execute(&mut exec_ctx), 10.0);
+        exec_ctx.anim_time = 1.0;
+        assert_eq!(ladder_code.execute(&mut exec_ctx), 20.0);
+        exec_ctx.anim_time = 2.0;
+        assert_eq!(ladder_code.execute(&mut exec_ctx), 30.0);
+        exec_ctx.anim_time = 99.0;
+        assert_eq!(ladder_code.execute(&mut exec_ctx), 40.0);
+
+        // 3. Optional else-branch (Bedrock syntax: cond ? then defaults else to 0.0)
+        let opt_else_true = engine.parse_expr("1 ? 42.0").unwrap();
+        assert_eq!(engine.evaluate(&opt_else_true, &ctx), 42.0);
+        let opt_else_false = engine.parse_expr("0 ? 42.0").unwrap();
+        assert_eq!(engine.evaluate(&opt_else_false, &ctx), 0.0);
+
+        // 4. Pathological nesting depths (5, 10, 20, 50, 100 levels)
+        let depths = [5, 10, 20, 50, 100];
+        for depth in depths {
+            let mut s = String::new();
+            for i in 0..depth {
+                s.push_str(&format!("{} > 0 ? {} : ", i, i));
+            }
+            s.push_str("999.0");
+
+            let parsed = engine.parse_expr(&s);
+            assert!(parsed.is_ok(), "Deep ternary at depth {} must parse cleanly", depth);
+
+            let bytecode = engine.compile_str(&s);
+            assert!(bytecode.is_ok(), "Deep ternary at depth {} must compile", depth);
+
+            let val = bytecode.unwrap().execute(&mut exec_ctx);
+            // 0 > 0 is false, 1 > 0 is true -> first branch 0 > 0 ? 0 : 1 > 0 ? 1 : ... evaluates to 1.0
+            assert_eq!(val, 1.0);
+        }
+
+        // 5. Malformed / dangling ternary operators must return Err without panicking
+        let malformed = ["?", "? 1 : 2", "1 ?", "1 ? : 2", "1 ? 2 :", "1 ? 2 : : 3"];
+        for bad in malformed {
+            let res = engine.parse_expr(bad);
+            assert!(res.is_err(), "Malformed ternary {:?} must return Err", bad);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 13: Unclosed & Mismatched Delimiters Crash Resistance
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_molang_unclosed_and_mismatched_delimiters() {
+        let engine = MolangEngine::new();
+
+        // 1. Unclosed parentheses and braces
+        let unclosed = [
+            "(",
+            "((",
+            "(((1 + 2)",
+            "1 + (2 * (3 + (4 * 5",
+            "math.sin(",
+            "math.clamp(1, 2",
+            "math.clamp(1, 2,",
+            "{",
+            "{{",
+            "{ t.a = 1; ",
+            "{ t.a = 1; { t.b = 2;",
+            "loop(5, { t.x = 1;",
+            "for_each(t.item, v.arr, { t.x = 1;",
+        ];
+
+        for input in unclosed {
+            assert!(
+                engine.parse_expr(input).is_err(),
+                "parse_expr must return Err for unclosed delimiter {:?}",
+                input
+            );
+            assert!(
+                engine.parse(input).is_err(),
+                "parse must return Err for unclosed delimiter {:?}",
+                input
+            );
+            assert!(
+                engine.compile_str(input).is_err(),
+                "compile_str must return Err for unclosed delimiter {:?}",
+                input
+            );
+        }
+
+        // 2. Stray closing delimiters
+        let stray_closing = [")", "))", ") + (", "}", "}}", "} + {", "({[", "(}", "{)"];
+        for input in stray_closing {
+            assert!(
+                engine.parse_expr(input).is_err(),
+                "parse_expr must return Err for stray closing delimiter {:?}",
+                input
+            );
+        }
+
+        // 3. Deeply nested balanced parentheses (100 levels) must evaluate cleanly
+        let mut balanced = String::new();
+        for _ in 0..100 {
+            balanced.push('(');
+        }
+        balanced.push_str("42.0");
+        for _ in 0..100 {
+            balanced.push(')');
+        }
+
+        let parsed_deep = engine.parse_expr(&balanced).expect("100-level balanced parens must parse");
+        let ctx = MolangContext::default();
+        assert_eq!(engine.evaluate(&parsed_deep, &ctx), 42.0);
+
+        // 4. Deeply nested unclosed parentheses (100 opens, 99 closes) must return Err
+        let mut unclosed_deep = String::new();
+        for _ in 0..100 {
+            unclosed_deep.push('(');
+        }
+        unclosed_deep.push_str("42.0");
+        for _ in 0..99 {
+            unclosed_deep.push(')');
+        }
+        assert!(engine.parse_expr(&unclosed_deep).is_err());
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 14: Dangling & Invalid Operators Syntax Resilience
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_molang_dangling_and_invalid_operators() {
+        let engine = MolangEngine::new();
+
+        let invalid_ops = [
+            // Single operators without operands
+            "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">=",
+            "&&", "||", "!", ":", "??", "->", ".", "=",
+            // Missing right operands
+            "1 +", "1 -", "1 *", "1 /", "1 %", "1 ==", "1 <", "1 >=",
+            // Missing left operands for binary operators
+            "* 1", "/ 1", "% 1", "== 1", "!= 1", "<= 1",
+            // Adjacent binary operators
+            "1 + * 2", "1 / / 2", "1 && || 2", "1 == == 2",
+            // Invalid entity dereference
+            "-> test", "v.entity ->", "1 -> 2",
+            // Multiple / invalid dots
+            "1.2.3.4", "..", "...", "v..x", ".1.2",
+            // Misplaced null-coalescing
+            "?? 42", "42 ??",
+            // Semicolons
+            ";;;;;;", "; 1 ; ; 2 ; ;",
+        ];
+
+        for input in invalid_ops {
+            // Must return Err or Ok(0.0) without panic
+            let _ = engine.parse_expr(input);
+            let _ = engine.parse(input);
+            let _ = engine.compile_str(input);
+        }
+
+        // Division and modulo by zero in Molang VM must not panic
+        let div_zero_cases = [
+            ("1.0 / 0.0", 0.0),
+            ("0.0 / 0.0", 0.0),
+            ("-5.0 / 0.0", 0.0),
+            ("1.0 % 0.0", 0.0),
+            ("math.mod(10.0, 0.0)", 0.0),
+        ];
+
+        let mut exec_ctx = ExecutionContext::new();
+        for (expr, expected) in div_zero_cases {
+            let code = engine.compile_str(expr).expect("Division by zero must compile");
+            let val = code.execute(&mut exec_ctx);
+            assert_eq!(val, expected, "Evaluation of {:?} must be safe 0.0", expr);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Test 15: Deterministic Property-Based Mutation Fuzzer (2,000 Iterations)
+    // -----------------------------------------------------------------------
+    #[test]
+    fn test_molang_deterministic_mutation_fuzzer() {
+        use std::panic::{catch_unwind, AssertUnwindSafe};
+
+        // Self-contained XorShift64 PRNG for zero-dependency deterministic fuzzing
+        struct XorShift64(u64);
+        impl XorShift64 {
+            fn next(&mut self) -> u64 {
+                let mut x = self.0;
+                x ^= x << 13;
+                x ^= x >> 7;
+                x ^= x << 17;
+                self.0 = x;
+                x
+            }
+            fn gen_range(&mut self, low: usize, high: usize) -> usize {
+                assert!(high > low);
+                (self.next() as usize % (high - low)) + low
+            }
+            fn gen_bool(&mut self, pct: u8) -> bool {
+                (self.next() % 100) < (pct as u64)
+            }
+        }
+
+        let mut rng = XorShift64(0xDEAD_BEEF_CAFE_1337);
+        let engine = MolangEngine::new();
+
+        let token_pool = [
+            "0", "1", "42.5", "-3.14", "1e10", "1e-10",
+            "v.test", "t.scratch", "c.is_first_person", "q.anim_time", "q.ground_speed",
+            "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">=",
+            "&&", "||", "!", "?", ":", "??", "->", "=", ";", ",",
+            "(", ")", "{", "}",
+            "math.sin", "math.cos", "math.clamp", "math.lerp", "math.ease_out_cubic",
+            "return", "loop", "this",
+            "\"", "'", " ", "\t", "\n",
+            "foo", "bar_123", "__unknown__",
+            "\0", "\x01", "\x7F", "🚀", "🦀", "€",
+        ];
+
+        const FUZZ_TRIALS: usize = 2000;
+        let mut panics = 0;
+        let mut sample_panic = None;
+
+        for _ in 0..FUZZ_TRIALS {
+            let num_tokens = rng.gen_range(1, 20);
+            let mut script = String::new();
+            for _ in 0..num_tokens {
+                let idx = rng.gen_range(0, token_pool.len());
+                script.push_str(token_pool[idx]);
+                if rng.gen_bool(30) {
+                    script.push(' ');
+                }
+            }
+
+            let result = catch_unwind(AssertUnwindSafe(|| {
+                let mut exec_ctx = ExecutionContext::new();
+                if let Ok(ast) = engine.parse(&script) {
+                    let bytecode = engine.compile_script(&ast);
+                    let _ = bytecode.execute(&mut exec_ctx);
+                }
+                if let Ok(expr) = engine.parse_expr(&script) {
+                    let bytecode = engine.compile(&expr);
+                    let _ = bytecode.execute(&mut exec_ctx);
+                }
+                if let Ok(code) = engine.compile_str(&script) {
+                    let _ = code.execute(&mut exec_ctx);
+                }
+            }));
+
+            if let Err(payload) = result {
+                panics += 1;
+                if sample_panic.is_none() {
+                    let msg = if let Some(s) = payload.downcast_ref::<&str>() {
+                        s.to_string()
+                    } else if let Some(s) = payload.downcast_ref::<String>() {
+                        s.clone()
+                    } else {
+                        "Unknown panic payload".to_string()
+                    };
+                    sample_panic = Some((script.clone(), msg));
+                }
+            }
+        }
+
+        assert_eq!(
+            panics, 0,
+            "Fuzzing must yield 0 panics across {} trials. First panic on {:?}: {:?}",
+            FUZZ_TRIALS,
+            sample_panic.as_ref().map(|(s, _)| s),
+            sample_panic.as_ref().map(|(_, p)| p)
         );
     }
 }
