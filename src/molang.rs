@@ -2203,6 +2203,12 @@ pub struct ExecutionContext<'a> {
     pub query_fn: Option<&'a dyn Fn(u16, &[f32]) -> f32>,
 }
 
+impl<'a> Default for ExecutionContext<'a> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> ExecutionContext<'a> {
     pub fn new() -> Self {
         Self {

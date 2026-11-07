@@ -40,10 +40,13 @@ Engineered to bind directly into Horizon's `wgpu` vertex pipeline and server-thr
 ## Roadmap
 
 - [x] Initial repository structure & AnyPS5-style progress tracking
-- [ ] Molang AST parser & query state bindings
-- [ ] Bedrock `.mcpack` animation format deserializer (1.8.0 / 1.10.0 JSON)
-- [ ] Humanoid relative pivot rig & Catmull-Rom spline interpolation
-- [ ] 3D Attachable geometry parser & 1st-person viewmodel transforms
+- [x] Molang AST parser & query state bindings (Zero-Allocation Bytecode VM)
+- [x] Bedrock `.mcpack` animation format deserializer (1.8.0 / 1.10.0 JSON)
+- [x] Humanoid relative pivot rig (Zero Hip Collapse & Limb Detachment)
+- [x] Catmull-Rom spline interpolation with chord reflection
+- [x] 3D Attachable geometry parser & 1st-person viewmodel transforms (Anti-clipping 70° FOV)
+- [x] Standalone preview viewer & benchmark runner (`cargo run --example viewer`)
+- [x] GitHub Actions automated CI workflows
 - [ ] Horizon client runtime bridge
 
 ---

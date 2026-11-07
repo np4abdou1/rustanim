@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 482" width="1000" height="482">
 <rect x="0.00" y="0.00" width="1000.00" height="482.00" fill="#0d1117" stroke="#0d1117" stroke-width="0"/>
-<text x="4.00" y="21.00" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">Player Animations (Actions &amp; Stuff): 5.59% (8/143)</text>
-<g><title>Combat: 2/36 (6%)</title>
+<text x="4.00" y="21.00" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">Player Animations (Actions &amp; Stuff): 19.58% (28/143)</text>
+<g><title>Combat: 10/36 (28%)</title>
 <rect x="1.00" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="30.17" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
-<rect x="59.35" y="31.00" width="29.17" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="88.52" y="31.00" width="29.17" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="117.69" y="31.00" width="29.17" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="146.87" y="31.00" width="29.17" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="176.04" y="31.00" width="29.17" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="205.21" y="31.00" width="29.17" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="1.00" y="60.25" width="33.34" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="34.34" y="60.25" width="33.34" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<rect x="59.35" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="88.52" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="117.69" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="146.87" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="176.04" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="205.21" y="31.00" width="29.17" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="1.00" y="60.25" width="33.34" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="34.34" y="60.25" width="33.34" height="29.25" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="67.68" y="60.25" width="33.34" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="101.02" y="60.25" width="33.34" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="134.36" y="60.25" width="33.34" height="29.25" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -41,18 +41,18 @@
 <rect x="0.00" y="30.00" width="235.38" height="148.24" fill="none" stroke="#0d1117" stroke-width="2"/>
 <text x="5.00" y="46.00" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">Combat</text>
 </g>
-<g><title>Locomotion: 4/32 (12%)</title>
+<g><title>Locomotion: 11/32 (34%)</title>
 <rect x="1.00" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="30.17" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="59.35" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="88.52" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
-<rect x="117.69" y="179.24" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="146.87" y="179.24" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="176.04" y="179.24" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="205.21" y="179.24" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="1.00" y="211.68" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="30.17" y="211.68" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="59.35" y="211.68" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<rect x="117.69" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="146.87" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="176.04" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="205.21" y="179.24" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="1.00" y="211.68" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="30.17" y="211.68" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="59.35" y="211.68" width="29.17" height="32.44" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="88.52" y="211.68" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="117.69" y="211.68" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="146.87" y="211.68" width="29.17" height="32.44" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -77,13 +77,13 @@
 <rect x="0.00" y="178.24" width="235.38" height="131.76" fill="none" stroke="#0d1117" stroke-width="2"/>
 <text x="5.00" y="194.24" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">Locomotion</text>
 </g>
-<g><title>Actions: 1/26 (4%)</title>
+<g><title>Actions: 6/26 (23%)</title>
 <rect x="236.38" y="31.00" width="25.23" height="32.45" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
-<rect x="261.62" y="31.00" width="25.23" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="286.85" y="31.00" width="25.23" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="312.09" y="31.00" width="25.23" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="337.32" y="31.00" width="25.23" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="362.56" y="31.00" width="25.23" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<rect x="261.62" y="31.00" width="25.23" height="32.45" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="286.85" y="31.00" width="25.23" height="32.45" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="312.09" y="31.00" width="25.23" height="32.45" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="337.32" y="31.00" width="25.23" height="32.45" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="362.56" y="31.00" width="25.23" height="32.45" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="236.38" y="63.45" width="30.28" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="266.67" y="63.45" width="30.28" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="296.95" y="63.45" width="30.28" height="32.45" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -168,19 +168,19 @@
 <rect x="369.38" y="194.27" width="125.62" height="115.73" fill="none" stroke="#0d1117" stroke-width="2"/>
 <text x="374.38" y="210.27" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">Idle &amp; Facial</text>
 </g>
-<text x="509.00" y="21.00" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">3D Items &amp; Attachables: 2.61% (3/115)</text>
-<g><title>Weapons3D: 2/38 (5%)</title>
+<text x="509.00" y="21.00" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">3D Items &amp; Attachables: 20.0% (23/115)</text>
+<g><title>Weapons3D: 11/38 (29%)</title>
 <rect x="506.00" y="31.00" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="538.31" y="31.00" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
-<rect x="570.63" y="31.00" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="602.94" y="31.00" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="635.25" y="31.00" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="506.00" y="65.75" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="538.31" y="65.75" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="570.63" y="65.75" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="602.94" y="65.75" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="635.25" y="65.75" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="506.00" y="100.50" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<rect x="570.63" y="31.00" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="602.94" y="31.00" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="635.25" y="31.00" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="506.00" y="65.75" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="538.31" y="65.75" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="570.63" y="65.75" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="602.94" y="65.75" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="635.25" y="65.75" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="506.00" y="100.50" width="32.31" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="538.31" y="100.50" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="570.63" y="100.50" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="602.94" y="100.50" width="32.31" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -211,13 +211,13 @@
 <rect x="505.00" y="30.00" width="163.57" height="280.00" fill="none" stroke="#0d1117" stroke-width="2"/>
 <text x="510.00" y="46.00" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">3D Weapons</text>
 </g>
-<g><title>Tools3D: 1/29 (3%)</title>
+<g><title>Tools3D: 6/29 (21%)</title>
 <rect x="669.57" y="31.00" width="29.34" height="36.41" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
-<rect x="698.91" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="728.25" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="757.59" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="786.93" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="816.28" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<rect x="698.91" y="31.00" width="29.34" height="36.41" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="728.25" y="31.00" width="29.34" height="36.41" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="757.59" y="31.00" width="29.34" height="36.41" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="786.93" y="31.00" width="29.34" height="36.41" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="816.28" y="31.00" width="29.34" height="36.41" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="845.62" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="874.96" y="31.00" width="29.34" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="669.57" y="67.41" width="33.53" height="36.41" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -244,11 +244,11 @@
 <rect x="668.57" y="30.00" width="236.74" height="147.64" fill="none" stroke="#0d1117" stroke-width="2"/>
 <text x="673.57" y="46.00" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">3D Tools</text>
 </g>
-<g><title>ArmorWearables: 0/26 (0%)</title>
-<rect x="669.57" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="703.10" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="736.63" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="770.17" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<g><title>ArmorWearables: 4/26 (15%)</title>
+<rect x="669.57" y="178.64" width="33.53" height="32.59" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="703.10" y="178.64" width="33.53" height="32.59" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="736.63" y="178.64" width="33.53" height="32.59" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="770.17" y="178.64" width="33.53" height="32.59" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="803.70" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="837.24" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="870.77" y="178.64" width="33.53" height="32.59" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -274,9 +274,9 @@
 <rect x="668.57" y="177.64" width="236.74" height="132.36" fill="none" stroke="#0d1117" stroke-width="2"/>
 <text x="673.57" y="193.64" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#ffffff" stroke="#0d1117" stroke-width="3" paint-order="stroke">3D Armor &amp; Wear</text>
 </g>
-<g><title>HeldItemsOffhand: 0/22 (0%)</title>
-<rect x="906.30" y="31.00" width="30.90" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
-<rect x="937.20" y="31.00" width="30.90" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
+<g><title>HeldItemsOffhand: 2/22 (9%)</title>
+<rect x="906.30" y="31.00" width="30.90" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
+<rect x="937.20" y="31.00" width="30.90" height="34.75" fill="#2ea043" stroke="#0d1117" stroke-width="0.5"/>
 <rect x="968.10" y="31.00" width="30.90" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="906.30" y="65.75" width="30.90" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
 <rect x="937.20" y="65.75" width="30.90" height="34.75" fill="#161b22" stroke="#30363d" stroke-width="0.5"/>
@@ -308,12 +308,12 @@
 <text x="491.00" y="351.00" font-family="monospace" font-size="11" font-weight="normal" fill="#8b949e" text-anchor="end">32/32</text>
 <text x="4.00" y="373.00" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="normal" fill="#c9d1d9" text-anchor="start">Rig &amp; Pivots</text>
 <rect x="170.00" y="362.00" width="253" height="13" fill="#21262d" rx="2"/>
-<rect x="170.00" y="362.00" width="75.90" height="13" fill="#2ea043" rx="2"/>
-<text x="491.00" y="373.00" font-family="monospace" font-size="11" font-weight="normal" fill="#8b949e" text-anchor="end">6/20</text>
+<rect x="170.00" y="362.00" width="177.10" height="13" fill="#2ea043" rx="2"/>
+<text x="491.00" y="373.00" font-family="monospace" font-size="11" font-weight="normal" fill="#8b949e" text-anchor="end">14/20</text>
 <text x="4.00" y="395.00" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="normal" fill="#c9d1d9" text-anchor="start">1st/3rd Viewport</text>
 <rect x="170.00" y="384.00" width="253" height="13" fill="#21262d" rx="2"/>
-<rect x="170.00" y="384.00" width="50.60" height="13" fill="#2ea043" rx="2"/>
-<text x="491.00" y="395.00" font-family="monospace" font-size="11" font-weight="normal" fill="#8b949e" text-anchor="end">3/15</text>
+<rect x="170.00" y="384.00" width="151.80" height="13" fill="#2ea043" rx="2"/>
+<text x="491.00" y="395.00" font-family="monospace" font-size="11" font-weight="normal" fill="#8b949e" text-anchor="end">9/15</text>
 <text x="509.00" y="351.00" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#58a6ff" text-anchor="start">▸ Bedrock Molang Engine</text>
 <text x="690.00" y="351.00" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="normal" fill="#8b949e" text-anchor="start">Compiled AST closures (zero alloc)</text>
 <text x="509.00" y="373.00" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" fill="#58a6ff" text-anchor="start">▸ Bone Hierarchy &amp; Pivots</text>

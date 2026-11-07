@@ -21,13 +21,17 @@ ANIMATION_CATEGORIES = [
     {
         "name": "Locomotion",
         "label": "Locomotion",
-        "done": 4,
-        "todo": 28,
-        "done_names": ["walk_forward", "walk_bob", "sprint_straight", "idle_stand"],
+        "done": 11,
+        "todo": 21,
+        "done_names": [
+            "walk_forward", "walk_bob", "sprint_straight", "idle_stand",
+            "sprint_lean", "walk_backwards", "jump_squat", "jump_fall", "jump_land_squat",
+            "sneak_creep", "sneak_idle"
+        ],
         "todo_names": [
-            "sprint_lean", "sprint_stop_slide", "walk_backwards", "strafe_left", "strafe_right",
-            "jump_squat", "jump_air_apex", "jump_fall", "jump_land_squat", "jump_run_land",
-            "sneak_creep", "sneak_idle", "sneak_walk_back", "crawl_prone", "crawl_move",
+            "sprint_stop_slide", "strafe_left", "strafe_right",
+            "jump_air_apex", "jump_run_land",
+            "sneak_walk_back", "crawl_prone", "crawl_move",
             "ladder_climb_up", "ladder_climb_down", "ladder_idle", "scaffolding_move",
             "stumble_bump", "air_turn_yaw", "slope_tilt", "sprint_jump_chain", "hard_fall_recoil",
             "turn_inplace_left", "turn_inplace_right", "step_up_knee", "edge_balance"
@@ -36,14 +40,18 @@ ANIMATION_CATEGORIES = [
     {
         "name": "Combat",
         "label": "Combat",
-        "done": 2,
-        "todo": 34,
-        "done_names": ["sword_basic_slash", "bare_hands_punch"],
+        "done": 10,
+        "todo": 26,
+        "done_names": [
+            "sword_basic_slash", "bare_hands_punch",
+            "sword_combo_1", "sword_combo_2", "shield_raise", "shield_block_hit", "shield_lower",
+            "bow_draw_charge", "bow_hold_aim", "bow_release_kick"
+        ],
         "todo_names": [
-            "sword_combo_1", "sword_combo_2", "sword_spin_heavy", "sword_sprint_dash", "sword_critical_air",
+            "sword_spin_heavy", "sword_sprint_dash", "sword_critical_air",
             "sword_sweep_cleave", "axe_chop_overhead", "axe_stun_smash", "dagger_quick_thrust",
-            "shield_raise", "shield_block_hit", "shield_parry_spark", "shield_lower",
-            "bow_draw_charge", "bow_hold_aim", "bow_release_kick", "crossbow_crank_stage1",
+            "shield_parry_spark",
+            "crossbow_crank_stage1",
             "crossbow_crank_stage2", "crossbow_loaded_aim", "crossbow_fire_recoil", "trident_charge_aim",
             "trident_throw_release", "trident_riptide_spin", "mace_smash_falling", "mace_wind_slam",
             "hurt_flinch_light", "hurt_heavy_knockback", "hurt_head_recoil", "death_collapse",
@@ -53,12 +61,15 @@ ANIMATION_CATEGORIES = [
     {
         "name": "Actions",
         "label": "Actions",
-        "done": 1,
-        "todo": 25,
-        "done_names": ["mine_pickaxe_swing"],
+        "done": 6,
+        "todo": 20,
+        "done_names": [
+            "mine_pickaxe_swing", "mine_axe_chop", "mine_shovel_dig", "block_place_push",
+            "eat_cycle_hand", "drink_potion_tilt"
+        ],
         "todo_names": [
-            "mine_axe_chop", "mine_shovel_dig", "mine_hoe_till", "block_place_push", "block_interact_press",
-            "eat_cycle_hand", "eat_bite_recoil", "drink_potion_tilt", "drink_finish_toss",
+            "mine_hoe_till", "block_interact_press",
+            "eat_bite_recoil", "drink_finish_toss",
             "spyglass_aim_eye", "spyglass_pan", "goat_horn_raise", "goat_horn_blow", "brush_archaeology_sweep",
             "flint_and_steel_strike", "shears_snip", "fishing_cast", "fishing_reel_strain",
             "firework_elytra_boost", "totem_activate_float", "book_read_open", "compass_look_down",
@@ -111,11 +122,14 @@ ATTACHABLE_CATEGORIES = [
     {
         "name": "Weapons3D",
         "label": "3D Weapons",
-        "done": 2,
-        "todo": 36,
-        "done_names": ["diamond_sword_3d", "iron_sword_3d"],
+        "done": 11,
+        "todo": 27,
+        "done_names": [
+            "diamond_sword_3d", "iron_sword_3d", "netherite_sword_3d", "golden_sword_3d",
+            "stone_sword_3d", "wooden_sword_3d", "1st_person_sword_offset_fix", "1st_person_sword_swing_arc",
+            "1st_person_shield_fov_fix", "sheathed_weapon_back_mount", "sheathed_weapon_hip_mount"
+        ],
         "todo_names": [
-            "netherite_sword_3d", "golden_sword_3d", "stone_sword_3d", "wooden_sword_3d",
             "mace_heavy_3d", "trident_item_3d", "bow_unpulled_3d", "bow_pulling_0_3d",
             "bow_pulling_1_3d", "bow_pulling_2_3d", "crossbow_standby_3d", "crossbow_pulling_0_3d",
             "crossbow_pulling_1_3d", "crossbow_pulling_2_3d", "crossbow_arrow_loaded_3d",
@@ -123,19 +137,20 @@ ATTACHABLE_CATEGORIES = [
             "custom_scythe_3d", "custom_rapier_3d", "custom_katana_hip", "custom_battleaxe_double",
             "custom_spear_shaft", "custom_warhammer_stone", "custom_halberd_steel",
             "enchant_glow_sword_overlay", "sharpness_spark_emitter", "fire_aspect_flame_bones",
-            "sweeping_edge_blade_trail", "1st_person_sword_offset_fix", "1st_person_sword_swing_arc",
-            "1st_person_bow_aim_view", "1st_person_shield_fov_fix", "offhand_sword_parry_pos",
-            "sheathed_weapon_back_mount", "sheathed_weapon_hip_mount"
+            "sweeping_edge_blade_trail",
+            "1st_person_bow_aim_view", "offhand_sword_parry_pos"
         ],
     },
     {
         "name": "Tools3D",
         "label": "3D Tools",
-        "done": 1,
-        "todo": 28,
-        "done_names": ["diamond_pickaxe_3d"],
+        "done": 6,
+        "todo": 23,
+        "done_names": [
+            "diamond_pickaxe_3d", "netherite_pickaxe_3d", "iron_pickaxe_3d", "golden_pickaxe_3d",
+            "stone_pickaxe_3d", "wooden_pickaxe_3d"
+        ],
         "todo_names": [
-            "netherite_pickaxe_3d", "iron_pickaxe_3d", "golden_pickaxe_3d", "stone_pickaxe_3d", "wooden_pickaxe_3d",
             "netherite_axe_3d", "diamond_axe_3d", "iron_axe_3d", "golden_axe_3d", "stone_axe_3d", "wooden_axe_3d",
             "netherite_shovel_3d", "diamond_shovel_3d", "iron_shovel_3d", "stone_shovel_3d",
             "diamond_hoe_3d", "iron_hoe_3d", "shears_jointed_3d", "fishing_rod_cast_3d", "fishing_rod_hook_3d",
@@ -146,14 +161,16 @@ ATTACHABLE_CATEGORIES = [
     {
         "name": "ArmorWearables",
         "label": "3D Armor & Wear",
-        "done": 0,
-        "todo": 26,
-        "done_names": [],
+        "done": 4,
+        "todo": 22,
+        "done_names": [
+            "shield_back_holster_3d", "turtle_helmet_3d", "netherite_helmet_crest_3d", "diamond_helmet_visor_3d"
+        ],
         "todo_names": [
-            "turtle_helmet_3d", "netherite_helmet_crest_3d", "diamond_helmet_visor_3d", "iron_helmet_brow_3d",
+            "iron_helmet_brow_3d",
             "golden_crown_3d", "chainmail_coif_3d", "leather_cap_feather_3d", "netherite_chestplate_pauldron_3d",
             "diamond_chestplate_guard_3d", "iron_chestplate_gorget_3d", "elytra_folded_back_3d", "elytra_spread_wings_3d",
-            "quiver_arrow_storage_3d", "backpack_traveler_3d", "cape_physics_rig_3d", "shield_back_holster_3d",
+            "quiver_arrow_storage_3d", "backpack_traveler_3d", "cape_physics_rig_3d",
             "heavy_boots_spurs_3d", "greaves_knee_poleyns_3d", "crown_gem_shimmer", "witch_hat_slouched_3d",
             "pumpkin_carved_mask_3d", "dragon_head_jaw_open_3d", "piglin_head_ear_sway_3d", "creeper_head_shudder_3d",
             "skeleton_skull_eye_socket_3d", "wither_skull_aura_3d"
@@ -162,11 +179,13 @@ ATTACHABLE_CATEGORIES = [
     {
         "name": "HeldItemsOffhand",
         "label": "Held & Offhand",
-        "done": 0,
-        "todo": 22,
-        "done_names": [],
+        "done": 2,
+        "todo": 20,
+        "done_names": [
+            "shield_offhand_grip_3d", "shield_blocking_angle_3d"
+        ],
         "todo_names": [
-            "shield_offhand_grip_3d", "shield_blocking_angle_3d", "shield_banner_pattern_3d", "totem_undying_held_3d",
+            "shield_banner_pattern_3d", "totem_undying_held_3d",
             "torch_burning_flame_3d", "soul_torch_blue_smoke_3d", "redstone_torch_spark_3d", "lantern_swing_chain_3d",
             "soul_lantern_swing_3d", "potion_cork_flask_3d", "splash_potion_round_3d", "lingering_potion_cloud_3d",
             "honey_bottle_viscous_3d", "milk_bucket_rim_3d", "water_bucket_surface_3d", "lava_bucket_glow_3d",
@@ -198,30 +217,30 @@ PARITY_SUBSYSTEMS = [
     {
         "name": "RigBoneHierarchy",
         "label": "Rig & Pivots",
-        "done": 6,
-        "todo": 14,
+        "done": 14,
+        "todo": 6,
         "done_names": [
             "relative_pivot_calc", "bone_parent_matrix", "rotation_order_zyx",
-            "preserve_hip_leg_joint", "preserve_shoulder_pivot", "preserve_head_neck_pivot"
+            "preserve_hip_leg_joint", "preserve_shoulder_pivot", "preserve_head_neck_pivot",
+            "waist_spine_chain", "knee_elbow_ik_bend", "hand_item_mount_socket", "offhand_mount_socket",
+            "bone_scale_interpolation", "custom_bone_extender", "matrix_cache_simd", "wgpu_vertex_transform_pass"
         ],
         "todo_names": [
-            "waist_spine_chain", "knee_elbow_ik_bend", "foot_ground_align_ik", "hand_item_mount_socket",
-            "offhand_mount_socket", "cape_cloth_spring_physics", "hair_ponytail_spring", "armor_cube_inflation_sync",
-            "slim_steve_alex_uv_switch", "custom_bone_extender", "matrix_cache_simd", "wgpu_vertex_transform_pass",
-            "bone_scale_interpolation", "locator_particle_sockets"
+            "foot_ground_align_ik", "cape_cloth_spring_physics", "hair_ponytail_spring", "armor_cube_inflation_sync",
+            "slim_steve_alex_uv_switch", "locator_particle_sockets"
         ],
     },
     {
         "name": "ViewportCameras",
         "label": "1st/3rd Viewport",
-        "done": 3,
-        "todo": 12,
+        "done": 9,
+        "todo": 6,
         "done_names": [
-            "third_person_camera_attach", "third_person_bone_blend", "first_person_fov_clipping_fix"
+            "third_person_camera_attach", "third_person_bone_blend", "first_person_fov_clipping_fix",
+            "first_person_3d_item_pos", "first_person_item_bob_pitch", "first_person_mining_swing",
+            "first_person_bow_draw_fov", "first_person_shield_block_offset", "first_person_dual_render"
         ],
         "todo_names": [
-            "first_person_3d_item_pos", "first_person_item_bob_pitch", "first_person_mining_swing",
-            "first_person_bow_draw_fov", "first_person_shield_block_offset", "first_person_dual_render",
             "third_person_free_orbit", "shoulder_cam_cinematic_lerp", "submerged_water_refraction",
             "death_cam_tilt_horizon", "vr_stereo_rig_compat", "replay_perspective_export"
         ],
