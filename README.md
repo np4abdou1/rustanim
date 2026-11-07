@@ -19,6 +19,20 @@ Bringing full-fidelity Bedrock animation rigs (such as **Actions & Stuff 1.12**)
 
 ---
 
+## User In-Game & Horizon Testing Status
+
+Track manual in-game testing progress across First-Person viewmodels, Third-Person locomotion, and Horizon engine integration:
+
+[![user testing badge](badge-testing.svg)](TESTING_PROGRESS.md)
+
+[![user testing map](progress-testing.svg)](TESTING_PROGRESS.md)
+
+[**Interactive Testing Checklist (TESTING_PROGRESS.md)**](TESTING_PROGRESS.md)
+
+<sub>* To mark a test complete, change `- [ ]` to `- [x]` in [`TESTING_PROGRESS.md`](TESTING_PROGRESS.md) and run `python3 tools/progress.py`. The squares above will turn green (`#2ea043`).</sub>
+
+---
+
 ## Key Architecture
 
 ### 1. Relative Pivot Rigging (No Limb Stretching or Hip Collapse)

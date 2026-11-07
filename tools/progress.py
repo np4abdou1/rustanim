@@ -396,6 +396,66 @@ def render_markdown():
 
     return "\n".join(lines)
 
+def parse_testing_markdown():
+    testing_md = ROOT / "TESTING_PROGRESS.md"
+    if not testing_md.exists():
+        return None
+
+    content = testing_md.read_text()
+    sections = [
+        {"title": "1st-Person In-Game Tests", "header": "## 1. First-Person In-Game Tests"},
+        {"title": "3rd-Person Locomotion Tests", "header": "## 2. Third-Person Locomotion & Actions"},
+        {"title": "Horizon wgpu & Parity Tests", "header": "## 3. Horizon wgpu & Parity Checks"},
+    ]
+
+    panels = []
+    lines = content.splitlines()
+    for sec_idx, sec in enumerate(sections):
+        start_idx = None
+        for i, line in enumerate(lines):
+            if sec["header"] in line:
+                start_idx = i
+                break
+
+        done, todo = 0, 0
+        if start_idx is not None:
+            for line in lines[start_idx + 1:]:
+                if line.startswith("## "):
+                    break
+                if line.strip().startswith("- [x]"):
+                    done += 1
+                elif line.strip().startswith("- [ ]"):
+                    todo += 1
+
+        total = done + todo
+        pct = round(100 * done / total, 1) if total > 0 else 0.0
+        panels.append({"title": sec["title"], "done": done, "todo": todo, "percent": pct})
+
+    return panels
+
+def render_testing_svg(panels):
+    total_w = PANEL_WIDTH * 3 + GAP * 2
+    total_h = MAP_HEIGHT + HEADER + 20
+
+    svg = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{total_w}" height="{total_h}" viewBox="0 0 {total_w} {total_h}">',
+        f'<rect width="{total_w}" height="{total_h}" fill="{BORDER}"/>',
+        '<style>',
+        f'text {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: {TEXT}; }}',
+        '.header {{ font-size: 16px; font-weight: 600; }}',
+        '.sub {{ font-size: 13px; fill: #8b949e; }}',
+        '</style>',
+    ]
+
+    for i, p in enumerate(panels):
+        px = i * (PANEL_WIDTH + GAP)
+        svg.append(f'<text x="{px + 10}" y="24" class="header">{escape(p["title"])}</text>')
+        svg.append(f'<text x="{px + PANEL_WIDTH - 10}" y="24" text-anchor="end" class="sub">{p["done"]}/{p["done"]+p["todo"]} ({p["percent"]}%)</text>')
+        svg.extend(draw_map(p, px, HEADER, PANEL_WIDTH, MAP_HEIGHT))
+
+    svg.append('</svg>')
+    return "\n".join(svg)
+
 def main():
     # 1. Update progress.svg
     svg_content = render_svg()
@@ -418,6 +478,19 @@ def main():
     progress_md = ROOT / "PROGRESS.md"
     progress_md.write_text(md_content)
     print(f"Generated {progress_md}")
+
+    # 4. Update progress-testing.svg and badge-testing.svg for user testing
+    test_panels = parse_testing_markdown()
+    if test_panels:
+        testing_svg = render_testing_svg(test_panels)
+        (ROOT / "progress-testing.svg").write_text(testing_svg)
+        print("Generated progress-testing.svg")
+
+        total_done = sum(p["done"] for p in test_panels)
+        total_tests = sum(p["done"] + p["todo"] for p in test_panels)
+        total_pct = round(100 * total_done / total_tests, 1) if total_tests > 0 else 0.0
+        (ROOT / "badge-testing.svg").write_text(make_badge("user testing", total_pct))
+        print(f"Generated badge-testing.svg ({total_pct}%)")
 
 if __name__ == "__main__":
     main()

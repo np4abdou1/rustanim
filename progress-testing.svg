@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1505" height="330" viewBox="0 0 1505 330">
+<rect width="1505" height="330" fill="#0d1117"/>
+<style>
+text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #ffffff; }
+.header {{ font-size: 16px; font-weight: 600; }}
+.sub {{ font-size: 13px; fill: #8b949e; }}
+</style>
+<text x="10" y="24" class="header">1st-Person In-Game Tests</text>
+<text x="485" y="24" text-anchor="end" class="sub">0/30 (0.0%)</text>
+<rect x="0.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="0.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="0.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="0.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="66.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="66.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="66.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="66.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="132.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="132.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="132.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="132.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="198.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="198.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="198.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="198.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="264.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="341.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="418.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="264.0" y="90.0" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="264.0" y="163.3" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="264.0" y="236.7" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="327.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="383.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="439.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="327.0" y="172.5" width="67.2" height="68.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="327.0" y="241.2" width="67.2" height="68.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="394.2" y="172.5" width="50.4" height="91.7" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="444.6" y="172.5" width="50.4" height="91.7" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="394.2" y="264.2" width="100.8" height="45.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="515" y="24" class="header">3rd-Person Locomotion Tests</text>
+<text x="990" y="24" text-anchor="end" class="sub">0/30 (0.0%)</text>
+<rect x="505.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="505.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="505.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="505.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="571.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="571.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="571.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="571.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="637.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="637.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="637.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="637.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="703.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="703.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="703.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="703.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="769.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="846.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="923.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="769.0" y="90.0" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="769.0" y="163.3" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="769.0" y="236.7" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="832.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="888.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="944.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="832.0" y="172.5" width="67.2" height="68.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="832.0" y="241.2" width="67.2" height="68.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="899.2" y="172.5" width="50.4" height="91.7" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="949.6" y="172.5" width="50.4" height="91.7" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="899.2" y="264.2" width="100.8" height="45.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="1020" y="24" class="header">Horizon wgpu &amp; Parity Tests</text>
+<text x="1495" y="24" text-anchor="end" class="sub">0/30 (0.0%)</text>
+<rect x="1010.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1010.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1010.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1010.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1076.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1076.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1076.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1076.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1142.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1142.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1142.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1142.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1208.0" y="30.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1208.0" y="100.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1208.0" y="170.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1208.0" y="240.0" width="66.0" height="70.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1274.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1351.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1428.0" y="30.0" width="77.0" height="60.0" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1274.0" y="90.0" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1274.0" y="163.3" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1274.0" y="236.7" width="63.0" height="73.3" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1337.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1393.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1449.0" y="90.0" width="56.0" height="82.5" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1337.0" y="172.5" width="67.2" height="68.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1337.0" y="241.2" width="67.2" height="68.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1404.2" y="172.5" width="50.4" height="91.7" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1454.6" y="172.5" width="50.4" height="91.7" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<rect x="1404.2" y="264.2" width="100.8" height="45.8" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+</svg>
