@@ -92,7 +92,7 @@ tests/
    - Multi-channel bone animation hierarchy: verifying leg hip anchors remain fixed at $Y=12.0$ while waist leans forward $30^\circ$ and rotates $45^\circ$.
 
 4. **Tier 4: Real-World Workloads (`tests/e2e_tier4_real_world_workloads.rs`)**:
-   - Directly opening and reading `/home/ubuntu/rustani/Actions_and_Stuff_112.mcpack` (33.8MB).
+   - Directly opening and reading `Actions_and_Stuff_112.mcpack` (33.8MB).
    - Deserializing and evaluating the real locomotion walk cycle `animation.oreville_ans.tldiyl` across all 15 bones.
    - Deserializing the real 3D diamond sword attachable `attachables/gkx.json` (`minecraft:diamond_sword`).
    - Computing simultaneous 1st-person and 3rd-person transformation matrices for `diamond_sword_3d`.

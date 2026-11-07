@@ -19,7 +19,17 @@ fn main() {
     println!("================================================================================");
     println!("* High-Performance Standalone Preview Viewer & Parity Verification Engine\n");
 
-    let mcpack_path = "/home/ubuntu/rustani/Actions_and_Stuff_112.mcpack";
+    let mcpack_candidates = [
+        std::env::var("MCPACK_PATH").unwrap_or_default(),
+        "Actions_and_Stuff_112.mcpack".into(),
+        "../Actions_and_Stuff_112.mcpack".into(),
+    ];
+    let mcpack_path = mcpack_candidates
+        .iter()
+        .find(|p| !p.is_empty() && std::path::Path::new(p).exists())
+        .map(|s| s.as_str())
+        .unwrap_or("Actions_and_Stuff_112.mcpack");
+
     println!("[1/5] Checking mcpack archive: {}", mcpack_path);
 
     let start_load = Instant::now();

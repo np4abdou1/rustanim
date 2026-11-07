@@ -79,4 +79,4 @@ cargo test --test e2e_tier4_real_world_workloads
    With the dedicated 1st-person viewmodel matrix ($70.0^\circ$ vertical FOV and compressed $z_{\text{near}} = 0.01\text{m}$), weapon vertices as close as $0.0101\text{m}$ in front of the camera lens project inside normalized device coordinates ($z \in [-1, 1]$), eliminating weapon clipping through player viewpoint.
 
 3. **Authentic Bedrock Asset Compatibility**:
-   Direct decompression and evaluation of `/home/ubuntu/rustani/Actions_and_Stuff_112.mcpack` verified the extraction of `animations/f2da1071.json` (>5MB, >2000 clips), multi-channel walk cycle `animation.oreville_ans.tldiyl` (11 rotation keyframes on legs, Molang expressions on waist and body), and 3D weapon attachable `attachables/gkx.json` (`minecraft:diamond_sword`).
+   Direct decompression and evaluation of `Actions_and_Stuff_112.mcpack` verified the extraction of `animations/f2da1071.json` (>5MB, >2000 clips), multi-channel walk cycle `animation.oreville_ans.tldiyl` (11 rotation keyframes on legs, Molang expressions on waist and body), and 3D weapon attachable `attachables/gkx.json` (`minecraft:diamond_sword`).

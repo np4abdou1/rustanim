@@ -2,7 +2,7 @@
 name = "rustanim"
 version = "0.1.0"
 edition = "2021"
-authors = ["abdollah <abdellah2019gg@gmail.com>"]
+authors = ["rustanim contributors"]
 description = "High-performance native Rust Bedrock .mcpack animation and 3D attachable engine for Horizon"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/np4abdou1/rustanim"

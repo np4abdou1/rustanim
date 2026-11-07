@@ -5,8 +5,25 @@ use glam::{EulerRot, Mat4, Quat, Vec3};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-/// Path to the authoritative resource pack archive.
-pub const MCPACK_PATH: &str = "/home/ubuntu/rustani/Actions_and_Stuff_112.mcpack";
+/// Authoritative resource pack filename.
+pub const MCPACK_PATH: &str = "Actions_and_Stuff_112.mcpack";
+
+/// Returns the path to the authoritative resource pack archive.
+pub fn find_mcpack_path() -> Option<PathBuf> {
+    if let Ok(p) = std::env::var("MCPACK_PATH") {
+        let pb = PathBuf::from(p);
+        if pb.exists() {
+            return Some(pb);
+        }
+    }
+    for candidate in &["Actions_and_Stuff_112.mcpack", "../Actions_and_Stuff_112.mcpack"] {
+        let pb = PathBuf::from(candidate);
+        if pb.exists() {
+            return Some(pb);
+        }
+    }
+    None
+}
 
 /// Helper for accessing the Actions & Stuff Bedrock mcpack archive.
 pub struct McpackFixture {
@@ -15,12 +32,7 @@ pub struct McpackFixture {
 
 impl McpackFixture {
     pub fn new() -> Option<Self> {
-        let path = PathBuf::from(MCPACK_PATH);
-        if path.exists() {
-            Some(Self { path })
-        } else {
-            None
-        }
+        find_mcpack_path().map(|path| Self { path })
     }
 
     pub fn path(&self) -> &Path {

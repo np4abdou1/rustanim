@@ -6,10 +6,15 @@ use std::path::PathBuf;
 use glam::Vec3;
 
 fn get_mcpack_path() -> Option<PathBuf> {
+    if let Ok(p) = std::env::var("MCPACK_PATH") {
+        let pb = PathBuf::from(p);
+        if pb.exists() {
+            return Some(pb);
+        }
+    }
     let candidates = [
-        PathBuf::from("/home/ubuntu/rustani/Actions_and_Stuff_112.mcpack"),
-        PathBuf::from("../Actions_and_Stuff_112.mcpack"),
         PathBuf::from("Actions_and_Stuff_112.mcpack"),
+        PathBuf::from("../Actions_and_Stuff_112.mcpack"),
     ];
     candidates.into_iter().find(|p| p.exists())
 }
