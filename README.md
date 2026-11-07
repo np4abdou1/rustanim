@@ -2,6 +2,9 @@
 
 > High-performance native Rust Bedrock `.mcpack` animation and 3D attachable engine for [Horizon](https://github.com/horizon-rust/horizon).
 
+<img width="1672" height="941" alt="Rustani_ Rust-Inspired Minecraft Actions" src="https://github.com/user-attachments/assets/a7f0cc89-2615-4944-8e06-69729dfdd0fd" />
+
+
 Bringing full-fidelity Bedrock animation rigs (such as **Actions & Stuff 1.12**) to Horizon with zero runtime overhead, exact relative joint pivots, and dual first-person & third-person 3D attachables.
 
 ## Status
