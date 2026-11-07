@@ -2,7 +2,7 @@
 
 > Exact tracking of Bedrock `.mcpack` (Actions & Stuff 1.12) animation clips, 3D attachables, and native Rust runtime subsystems.
 
-**Overall Status**: Animations: `5.59%` (8/143) | 3D Attachables: `2.61%` (3/115) | Parity Subsystems: `31.34%` (21/67)
+**Overall Status**: Animations: `5.59%` (8/143) | 3D Attachables: `2.61%` (3/115) | Parity Subsystems: `61.19%` (41/67)
 
 ---
 
@@ -74,7 +74,7 @@
 
 | Subsystem | Progress | Done | Total | Features |
 | :--- | :--- | :--- | :--- | :--- |
-| **Molang Engine** | `37.5%` | 12 | 32 | 12 implemented / 20 queued |
+| **Molang Engine** | `100.0%` | 32 | 32 | 32 implemented / 0 queued |
 | **Rig & Pivots** | `30.0%` | 6 | 20 | 6 implemented / 14 queued |
 | **1st/3rd Viewport** | `20.0%` | 3 | 15 | 3 implemented / 12 queued |
 

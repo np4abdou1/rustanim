@@ -180,14 +180,12 @@ PARITY_SUBSYSTEMS = [
     {
         "name": "MolangParser",
         "label": "Molang Engine",
-        "done": 12,
-        "todo": 20,
+        "done": 32,
+        "todo": 0,
         "done_names": [
             "tokenize_symbols", "parse_math_sin_cos", "parse_query_anim_time", "parse_query_is_sneaking",
             "parse_ternary_operator", "parse_boolean_logic", "eval_binary_ops", "variable_local_scope",
-            "query_ground_speed", "query_vertical_speed", "math_clamp_lerp", "math_abs_floor_ceil"
-        ],
-        "todo_names": [
+            "query_ground_speed", "query_vertical_speed", "math_clamp_lerp", "math_abs_floor_ceil",
             "math_min_max_pow", "math_asin_acos_atan", "math_atan2", "math_dice_roll",
             "query_yaw_speed", "query_pitch", "query_head_yaw", "query_target_dist",
             "query_is_swimming", "query_is_gliding", "query_is_on_fire", "query_is_in_water",
@@ -195,6 +193,7 @@ PARITY_SUBSYSTEMS = [
             "query_off_hand_empty", "query_shield_blocking", "context_lifetime_tracker",
             "molang_jit_bytecode", "molang_zero_alloc_eval"
         ],
+        "todo_names": [],
     },
     {
         "name": "RigBoneHierarchy",
