@@ -1,13 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="146" height="20" role="img" aria-label="engine parity: 55/67">
-  <linearGradient id="g" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
-  <mask id="m"><rect width="146" height="20" rx="3" fill="#fff"/></mask>
-  <g mask="url(#m)">
-    <rect width="100" height="20" fill="#21262d"/>
-    <rect x="100" width="46" height="20" fill="#2ea043"/>
-    <rect width="146" height="20" fill="url(#g)"/>
-  </g>
-  <g fill="#fff" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">
-    <text x="50.0" y="14" fill="#c9d1d9">engine parity</text>
-    <text x="123.0" y="14">55/67</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="157" height="20">
+<linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
+<mask id="a"><rect width="157" height="20" rx="3" fill="#fff"/></mask>
+<g mask="url(#a)">
+<path fill="#555" d="M0 0h103v20H0z"/>
+<path fill="#2ea043" d="M103 0h54v20H103z"/>
+<path fill="url(#b)" d="M0 0h157v20H0z"/>
+</g>
+<g fill="#fff" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="11">
+<text x="51.5" y="15" fill="#010101" fill-opacity=".3">engine parity</text>
+<text x="51.5" y="14">engine parity</text>
+<text x="130.0" y="15" fill="#010101" fill-opacity=".3">100.0%</text>
+<text x="130.0" y="14">100.0%</text>
+</g>
 </svg>

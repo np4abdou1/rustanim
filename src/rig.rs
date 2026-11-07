@@ -308,6 +308,170 @@ impl RelativePivotRig {
 
         (upper_rot, lower_rot)
     }
+
+    /// Aligns foot orientation to ground terrain normal with height adjustment.
+    pub fn align_foot_ground_ik(
+        &mut self,
+        foot_bone: &str,
+        ground_height: f32,
+        ground_normal: Vec3,
+    ) {
+        if let Some(bone) = self.bones.get_mut(foot_bone) {
+            let height_delta = ground_height - bone.base_pivot.y;
+            bone.relative_offset.y += height_delta.clamp(-2.0, 2.0);
+
+            let up = Vec3::Y;
+            let normal = ground_normal.normalize_or_zero();
+            if normal.length_squared() > 0.5 {
+                let tilt_rot = Quat::from_rotation_arc(up, normal);
+                bone.rotation = tilt_rot * bone.rotation;
+            }
+        }
+    }
+
+    /// Gets particle and effect emitter socket transform (e.g. eyes, hand particles, foot steps).
+    pub fn get_locator_transform(&self, socket_name: &str) -> Option<Mat4> {
+        let world = self.compute_world_transforms();
+        match socket_name {
+            "eye" | "eye_level" => world.get("head").map(|m| *m * Mat4::from_translation(Vec3::new(0.0, 4.0, 2.0))),
+            "right_hand_particle" => world.get("right_item").or_else(|| world.get("right_arm")).copied(),
+            "left_hand_particle" => world.get("left_item").or_else(|| world.get("left_arm")).copied(),
+            "right_foot_step" => world.get("right_leg").map(|m| *m * Mat4::from_translation(Vec3::new(0.0, -12.0, 0.0))),
+            "left_foot_step" => world.get("left_leg").map(|m| *m * Mat4::from_translation(Vec3::new(0.0, -12.0, 0.0))),
+            other => world.get(other).copied(),
+        }
+    }
+}
+
+/// Player humanoid model type distinguishing standard (Steve, 4px arms) from slim (Alex, 3px arms).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum PlayerModelType {
+    #[default]
+    WideSteve,
+    SlimAlex,
+}
+
+impl PlayerModelType {
+    /// Returns arm thickness in model pixel units.
+    #[inline]
+    pub fn arm_width(&self) -> f32 {
+        match self {
+            PlayerModelType::WideSteve => 4.0,
+            PlayerModelType::SlimAlex => 3.0,
+        }
+    }
+
+    /// Returns UV coordinates offset modifier for texture mapping.
+    #[inline]
+    pub fn arm_uv_offset(&self) -> (f32, f32) {
+        match self {
+            PlayerModelType::WideSteve => (0.0, 0.0),
+            PlayerModelType::SlimAlex => (-1.0, 0.0),
+        }
+    }
+}
+
+/// Spring-damper physics simulation for cloth capes.
+#[derive(Debug, Clone)]
+pub struct CapePhysicsRig {
+    pub position: Vec3,
+    pub velocity: Vec3,
+    pub pitch_angle: f32,
+    pub roll_angle: f32,
+    pub stiffness: f32,
+    pub damping: f32,
+}
+
+impl Default for CapePhysicsRig {
+    fn default() -> Self {
+        Self {
+            position: Vec3::ZERO,
+            velocity: Vec3::ZERO,
+            pitch_angle: 0.0,
+            roll_angle: 0.0,
+            stiffness: 140.0,
+            damping: 12.0,
+        }
+    }
+}
+
+impl CapePhysicsRig {
+    /// Updates cape spring physics given body velocity and delta time.
+    pub fn update(&mut self, player_velocity: Vec3, delta_time: f32) {
+        let target_pitch = (player_velocity.length() * 14.0).clamp(0.0, 75.0);
+        let target_roll = (-player_velocity.x * 6.0).clamp(-30.0, 30.0);
+
+        let pitch_accel = self.stiffness * (target_pitch - self.pitch_angle) - self.damping * self.velocity.x;
+        self.velocity.x += pitch_accel * delta_time;
+        self.pitch_angle += self.velocity.x * delta_time;
+
+        let roll_accel = self.stiffness * (target_roll - self.roll_angle) - self.damping * self.velocity.y;
+        self.velocity.y += roll_accel * delta_time;
+        self.roll_angle += self.velocity.y * delta_time;
+    }
+
+    /// Computes the cape's local matrix relative to torso body anchor.
+    pub fn local_matrix(&self) -> Mat4 {
+        Mat4::from_translation(Vec3::new(0.0, 24.0, -2.5))
+            * Mat4::from_rotation_x(-self.pitch_angle.to_radians())
+            * Mat4::from_rotation_z(self.roll_angle.to_radians())
+    }
+}
+
+/// Secondary motion spring for hair, ponytails, ears, or antennas.
+#[derive(Debug, Clone)]
+pub struct SecondaryMotionSpring {
+    pub current_angle: Vec3,
+    pub velocity: Vec3,
+    pub stiffness: f32,
+    pub damping: f32,
+}
+
+impl Default for SecondaryMotionSpring {
+    fn default() -> Self {
+        Self {
+            current_angle: Vec3::ZERO,
+            velocity: Vec3::ZERO,
+            stiffness: 180.0,
+            damping: 15.0,
+        }
+    }
+}
+
+impl SecondaryMotionSpring {
+    pub fn update(&mut self, target_inertia: Vec3, delta_time: f32) {
+        let accel = self.stiffness * (target_inertia - self.current_angle) - self.damping * self.velocity;
+        self.velocity += accel * delta_time;
+        self.current_angle += self.velocity * delta_time;
+    }
+}
+
+/// Armor cube inflation synchronization (syncs base joint transforms to expanded armor layer bounds).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ArmorCubeInflation {
+    pub helmet_inflation: f32,
+    pub chestplate_inflation: f32,
+    pub leggings_inflation: f32,
+    pub boots_inflation: f32,
+}
+
+impl Default for ArmorCubeInflation {
+    fn default() -> Self {
+        Self {
+            helmet_inflation: 0.5,
+            chestplate_inflation: 0.75,
+            leggings_inflation: 0.4,
+            boots_inflation: 0.5,
+        }
+    }
+}
+
+impl ArmorCubeInflation {
+    /// Computes scaled transform with inflation padding.
+    pub fn apply_inflation(&self, base_matrix: Mat4, inflation_units: f32) -> Mat4 {
+        let scale_factor = 1.0 + (inflation_units / 16.0);
+        base_matrix * Mat4::from_scale(Vec3::splat(scale_factor))
+    }
 }
 
 #[cfg(test)]
@@ -377,5 +541,45 @@ mod tests {
         );
         assert!(upper_rot.is_finite());
         assert!(lower_rot.is_finite());
+    }
+
+    #[test]
+    fn test_foot_ground_ik_alignment() {
+        let mut rig = RelativePivotRig::new_humanoid();
+        let ground_normal = Vec3::new(0.0, 0.9, 0.435).normalize();
+        rig.align_foot_ground_ik("right_leg", 11.5, ground_normal);
+        let bone = &rig.bones["right_leg"];
+        assert!((bone.relative_offset.y - (-0.5)).abs() < 1e-4);
+        assert!(bone.rotation.is_finite());
+    }
+
+    #[test]
+    fn test_cape_physics_and_spring() {
+        let mut cape = CapePhysicsRig::default();
+        cape.update(Vec3::new(0.0, 0.0, 4.0), 0.05); // Running forward 4m/s
+        assert!(cape.pitch_angle > 0.0, "Cape should flap backwards when moving forward");
+        let m = cape.local_matrix();
+        assert!(m.is_finite());
+    }
+
+    #[test]
+    fn test_steve_alex_uv_and_armor_inflation() {
+        assert_eq!(PlayerModelType::WideSteve.arm_width(), 4.0);
+        assert_eq!(PlayerModelType::SlimAlex.arm_width(), 3.0);
+        assert_eq!(PlayerModelType::SlimAlex.arm_uv_offset(), (-1.0, 0.0));
+
+        let inflation = ArmorCubeInflation::default();
+        let base_m = Mat4::IDENTITY;
+        let helmet_m = inflation.apply_inflation(base_m, inflation.helmet_inflation);
+        assert!(helmet_m.transform_point3(Vec3::ONE).x > 1.0);
+    }
+
+    #[test]
+    fn test_particle_locator_sockets() {
+        let rig = RelativePivotRig::new_humanoid();
+        let eye = rig.get_locator_transform("eye").expect("Eye locator must exist");
+        let hand = rig.get_locator_transform("right_hand_particle").expect("Hand locator must exist");
+        assert!(eye.is_finite());
+        assert!(hand.is_finite());
     }
 }

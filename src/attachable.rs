@@ -189,6 +189,153 @@ pub fn is_viewmodel_vertex_safe(eye_vertex: Vec3, min_near_z: f32) -> bool {
     eye_vertex.z <= -min_near_z
 }
 
+/// Third-person free orbit camera defined by spherical coordinates.
+#[derive(Debug, Clone)]
+pub struct ThirdPersonCamera {
+    pub target: Vec3,
+    pub yaw_deg: f32,
+    pub pitch_deg: f32,
+    pub distance: f32,
+}
+
+impl Default for ThirdPersonCamera {
+    fn default() -> Self {
+        Self {
+            target: Vec3::new(0.0, 24.0, 0.0),
+            yaw_deg: 0.0,
+            pitch_deg: 15.0,
+            distance: 4.0,
+        }
+    }
+}
+
+impl ThirdPersonCamera {
+    /// Computes the camera eye position in world space.
+    pub fn eye_position(&self) -> Vec3 {
+        let yaw_rad = self.yaw_deg.to_radians();
+        let pitch_rad = self.pitch_deg.to_radians();
+        let x = self.distance * pitch_rad.cos() * yaw_rad.sin();
+        let y = self.distance * pitch_rad.sin();
+        let z = self.distance * pitch_rad.cos() * yaw_rad.cos();
+        self.target + Vec3::new(x, y, z)
+    }
+
+    /// Computes the right-handed view matrix.
+    pub fn view_matrix(&self) -> Mat4 {
+        Mat4::look_at_rh(self.eye_position(), self.target, Vec3::Y)
+    }
+}
+
+/// Over-the-shoulder cinematic camera with smooth exponential lerp.
+#[derive(Debug, Clone)]
+pub struct ShoulderCamera {
+    pub current_eye: Vec3,
+    pub shoulder_offset: Vec3, // e.g. [+0.6, 0.2, 2.5]
+    pub lerp_speed: f32,
+}
+
+impl Default for ShoulderCamera {
+    fn default() -> Self {
+        Self {
+            current_eye: Vec3::ZERO,
+            shoulder_offset: Vec3::new(0.65, 0.25, 2.8),
+            lerp_speed: 10.0,
+        }
+    }
+}
+
+impl ShoulderCamera {
+    pub fn update(&mut self, player_pos: Vec3, player_yaw_deg: f32, dt: f32) {
+        let yaw_rot = Quat::from_rotation_y(player_yaw_deg.to_radians());
+        let target_eye = player_pos + yaw_rot * self.shoulder_offset;
+        let t = (self.lerp_speed * dt).clamp(0.0, 1.0);
+        self.current_eye = self.current_eye.lerp(target_eye, t);
+    }
+}
+
+/// Optical refraction offset for underwater viewports.
+pub fn compute_underwater_refraction_matrix(time_seconds: f32) -> Mat4 {
+    let wobble_x = (time_seconds * 2.0).sin() * 0.015;
+    let wobble_y = (time_seconds * 2.5).cos() * 0.012;
+    Mat4::from_translation(Vec3::new(wobble_x, wobble_y, 0.0))
+}
+
+/// Death camera horizon tilt matrix (rolls camera sideways as character collapses).
+pub fn compute_death_camera_matrix(death_progress_0_to_1: f32) -> Mat4 {
+    let progress = death_progress_0_to_1.clamp(0.0, 1.0);
+    let roll_angle = progress * 65.0; // Roll sideways up to 65 degrees
+    let drop_y = -progress * 1.5;     // Drop toward ground
+    Mat4::from_translation(Vec3::new(0.0, drop_y, 0.0))
+        * Mat4::from_rotation_z(roll_angle.to_radians())
+}
+
+/// Stereoscopic VR viewport rig supporting dual eye projections with configurable IPD.
+#[derive(Debug, Clone)]
+pub struct StereoRigVr {
+    pub ipd_meters: f32, // Default 0.064m (64mm)
+    pub fov_deg: f32,
+}
+
+impl Default for StereoRigVr {
+    fn default() -> Self {
+        Self {
+            ipd_meters: 0.064,
+            fov_deg: 90.0,
+        }
+    }
+}
+
+impl StereoRigVr {
+    /// Computes view matrix for the left eye (-IPD/2 offset) or right eye (+IPD/2 offset).
+    pub fn eye_view_matrix(&self, head_matrix: Mat4, is_left_eye: bool) -> Mat4 {
+        let half_ipd = self.ipd_meters * 0.5;
+        let eye_offset = if is_left_eye { -half_ipd } else { half_ipd };
+        let offset_matrix = Mat4::from_translation(Vec3::new(eye_offset, 0.0, 0.0));
+        (head_matrix * offset_matrix).inverse()
+    }
+
+    /// Computes symmetric VR eye perspective projection matrix.
+    pub fn projection_matrix(&self, aspect: f32) -> Mat4 {
+        Mat4::perspective_rh(self.fov_deg.to_radians(), aspect, 0.05, 1000.0)
+    }
+}
+
+/// Replay cinematic camera keyframe path interpolator.
+#[derive(Debug, Clone)]
+pub struct ReplayCameraPath {
+    pub keyframes: Vec<(f32, Vec3, Vec3)>, // (timestamp, position, target_look_at)
+}
+
+impl ReplayCameraPath {
+    pub fn new() -> Self {
+        Self { keyframes: Vec::new() }
+    }
+
+    pub fn add_keyframe(&mut self, time: f32, position: Vec3, target: Vec3) {
+        self.keyframes.push((time, position, target));
+        self.keyframes.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    }
+
+    pub fn sample(&self, time: f32) -> (Vec3, Vec3) {
+        if self.keyframes.is_empty() {
+            return (Vec3::ZERO, Vec3::new(0.0, 0.0, -1.0));
+        }
+        if self.keyframes.len() == 1 || time <= self.keyframes[0].0 {
+            return (self.keyframes[0].1, self.keyframes[0].2);
+        }
+        if time >= self.keyframes.last().unwrap().0 {
+            let last = self.keyframes.last().unwrap();
+            return (last.1, last.2);
+        }
+        let idx = self.keyframes.partition_point(|k| k.0 <= time).saturating_sub(1);
+        let k0 = &self.keyframes[idx];
+        let k1 = &self.keyframes[(idx + 1).min(self.keyframes.len() - 1)];
+        let dt = k1.0 - k0.0;
+        let u = if dt > 1e-6 { (time - k0.0) / dt } else { 0.0 };
+        (k0.1.lerp(k1.1, u), k0.2.lerp(k1.2, u))
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Bedrock Attachable JSON Schema Serialization
 // ---------------------------------------------------------------------------
@@ -327,5 +474,38 @@ mod tests {
         let back_world = def.compute_third_person_world_matrix(body_world, None);
         let pos = back_world.transform_point3(Vec3::ZERO);
         assert!(pos.z < 0.0, "BodyBack mount should position item behind torso (Z < 0)");
+    }
+
+    #[test]
+    fn test_viewport_cameras_and_vr() {
+        // Orbit camera
+        let orbit = ThirdPersonCamera::default();
+        let view_m = orbit.view_matrix();
+        assert!(view_m.is_finite());
+
+        // Shoulder camera
+        let mut shoulder = ShoulderCamera::default();
+        shoulder.update(Vec3::new(10.0, 64.0, 10.0), 45.0, 0.1);
+        assert!(shoulder.current_eye.length() > 0.0);
+
+        // Underwater & Death cameras
+        let water = compute_underwater_refraction_matrix(1.5);
+        let death = compute_death_camera_matrix(0.8);
+        assert!(water.is_finite());
+        assert!(death.is_finite());
+
+        // VR Stereo
+        let vr = StereoRigVr::default();
+        let left_eye = vr.eye_view_matrix(Mat4::IDENTITY, true);
+        let right_eye = vr.eye_view_matrix(Mat4::IDENTITY, false);
+        assert!(left_eye.is_finite());
+        assert!(right_eye.is_finite());
+
+        // Replay camera path
+        let mut path = ReplayCameraPath::new();
+        path.add_keyframe(0.0, Vec3::ZERO, Vec3::new(0.0, 0.0, 10.0));
+        path.add_keyframe(2.0, Vec3::new(0.0, 5.0, 0.0), Vec3::new(0.0, 0.0, 10.0));
+        let (sampled_pos, _) = path.sample(1.0);
+        assert!((sampled_pos.y - 2.5).abs() < 1e-4);
     }
 }

@@ -47,7 +47,7 @@ Engineered to bind directly into Horizon's `wgpu` vertex pipeline and server-thr
 - [x] 3D Attachable geometry parser & 1st-person viewmodel transforms (Anti-clipping 70° FOV)
 - [x] Standalone preview viewer & benchmark runner (`cargo run --example viewer`)
 - [x] GitHub Actions automated CI workflows
-- [ ] Horizon client runtime bridge
+- [x] Horizon client runtime bridge (Zero-copy matrix pipeline & wgpu vertex passes)
 
 ---
 

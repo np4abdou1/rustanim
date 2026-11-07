@@ -10,9 +10,18 @@ pub mod rig;
 pub use anim::{
     AnimChannel, AnimCoord, AnimVector, AnimationClip, AnimationController, AnimationFile,
     BedrockAnimationFile, BedrockAnimationClip, BedrockBoneAnimation, BoneAnimation, BoneChannel,
-    BonePose, ChannelType, FramePose, Keyframe, KeyframeChannel, KeyframePoint, LerpMode, LoopMode,
+    BonePose, CanonicalAnimState, ChannelType, FramePose, Keyframe, KeyframeChannel, KeyframePoint,
+    LerpMode, LoopMode,
 };
-pub use attachable::{AttachableDefinition, AttachableMountPoint, ItemTransform3D};
+pub use attachable::{
+    compute_underwater_refraction_matrix, compute_viewmodel_mainhand_base_offset,
+    compute_viewmodel_matrix, compute_viewmodel_offhand_base_offset, compute_viewmodel_projection,
+    is_viewmodel_vertex_safe, AttachableDefinition, AttachableMountPoint, BedrockAttachableFile,
+    ItemTransform3D, ReplayCameraPath, ShoulderCamera, StereoRigVr, ThirdPersonCamera,
+};
 pub use mcpack::{McpackArchive, McpackError};
-pub use molang::{MolangContext, MolangEngine, MolangExpr, MolangValue};
-pub use rig::{BoneHierarchy, BoneTransform, RelativePivotRig};
+pub use molang::{ExecutionContext, MolangBytecode, MolangContext, MolangEngine, MolangExpr, MolangValue};
+pub use rig::{
+    ArmorCubeInflation, BoneHierarchy, BoneTransform, CapePhysicsRig, PlayerModelType,
+    RelativePivotRig, SecondaryMotionSpring,
+};
