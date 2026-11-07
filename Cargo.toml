@@ -1,0 +1,17 @@
+[package]
+name = "rustanim"
+version = "0.1.0"
+edition = "2021"
+authors = ["abdollah <abdellah2019gg@gmail.com>"]
+description = "High-performance native Rust Bedrock .mcpack animation and 3D attachable engine for Horizon"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/np4abdou1/rustanim"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+glam = "0.28"
+smallvec = "1.13"
+
+[dev-dependencies]
+# dev dependencies for future tests

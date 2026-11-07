@@ -1,0 +1,8 @@
+/target/
+**/*.rs.bk
+*.rej
+*~
+.DS_Store
+.idea/
+.vscode/
+*.local/
