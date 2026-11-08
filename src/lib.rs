@@ -4,11 +4,16 @@
 pub mod anim;
 pub mod attachable;
 pub mod config;
+pub mod geometry;
 pub mod mcpack;
 pub mod molang;
 pub mod rig;
 
 pub use config::{get_live_config, save_live_config, set_config_path, RustanimConfig};
+pub use geometry::{
+    generate_cube_vertices, BedrockBone, BedrockCube, BedrockGeometryFile, BedrockModel,
+    BedrockVertex, CubeUv, FaceUv, GeometryContainer, GeometryDescription,
+};
 pub use anim::{
     AnimChannel, AnimCoord, AnimVector, AnimationClip, AnimationController, AnimationFile,
     BedrockAnimationFile, BedrockAnimationClip, BedrockBoneAnimation, BoneAnimation, BoneChannel,

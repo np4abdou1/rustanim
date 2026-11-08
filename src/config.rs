@@ -14,11 +14,11 @@ fn default_false() -> bool {
 }
 
 fn default_walk_speed_mult() -> f32 {
-    0.55
+    0.38
 }
 
 fn default_sprint_speed_mult() -> f32 {
-    0.65
+    0.45
 }
 
 fn default_1_0() -> f32 {
