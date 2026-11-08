@@ -522,6 +522,122 @@ pub struct PlayerAnimInput {
     pub is_fall_flying: bool,
 }
 
+const RIGHT_LEG_ROT_KFS: &[(f32, f32)] = &[
+    (0.0000, -2.36),
+    (0.2778, 38.40),
+    (0.3333, 48.30),
+    (0.3889, 51.40),
+    (0.4444, 48.36),
+    (0.5000, 28.87),
+    (0.6111, -22.58),
+    (0.6667, -34.80),
+    (0.7222, -39.00),
+    (0.7778, -34.98),
+    (1.0000, -2.36),
+];
+
+const RIGHT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
+    (0.0000, -0.15, 0.40),
+    (0.1667, -0.60, 1.00),
+    (0.2222, -0.96, 1.10),
+    (0.2778, -1.64, 1.10),
+    (0.3333, -2.65, 0.96),
+    (0.3889, -2.95, 0.67),
+    (0.4444, -2.07, 0.27),
+    (0.5000, 0.70, 0.08),
+    (0.5556, 2.13, -0.12),
+    (0.6111, 1.50, -0.31),
+    (0.6667, 0.00, -0.51),
+    (0.7222, -2.10, -0.60),
+    (0.7778, -1.43, -0.57),
+    (0.8333, -0.81, -0.45),
+    (1.0000, -0.15, 0.40),
+];
+
+const SPRINT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
+    (0.0000, -0.15, -0.50),
+    (0.0417, -0.40, -0.13),
+    (0.0833, -1.20, 0.40),
+    (0.1250, -2.00, 0.90),
+    (0.1667, -1.75, 1.20),
+    (0.2500, -0.50, 1.10),
+    (0.3333, 2.00, 0.32),
+    (0.4167, 2.20, -0.65),
+    (0.4583, 1.80, -0.90),
+    (0.5417, -1.80, -0.93),
+    (0.6250, -0.50, -0.80),
+    (0.6667, -0.15, -0.50),
+];
+
+fn sample_spline_1d(kfs: &[(f32, f32)], t: f32) -> f32 {
+    let t = t.rem_euclid(1.0);
+    let n = kfs.len();
+    if n == 0 { return 0.0; }
+    if n == 1 { return kfs[0].1; }
+    for i in 0..n - 1 {
+        if kfs[i].0 <= t && t <= kfs[i + 1].0 {
+            let i1 = i;
+            let i2 = i + 1;
+            let i0 = i1.saturating_sub(1);
+            let i3 = (i2 + 1).min(n - 1);
+            let (t1, p1) = kfs[i1];
+            let (t2, p2) = kfs[i2];
+            let dt = t2 - t1;
+            if dt < 1e-5 { return p1; }
+            let u = (t - t1) / dt;
+            let p0 = kfs[i0].1;
+            let p3 = kfs[i3].1;
+            let m1 = 0.5 * (p2 - p0);
+            let m2 = 0.5 * (p3 - p1);
+            let u2 = u * u;
+            let u3 = u2 * u;
+            let h00 = 2.0 * u3 - 3.0 * u2 + 1.0;
+            let h10 = u3 - 2.0 * u2 + u;
+            let h01 = -2.0 * u3 + 3.0 * u2;
+            let h11 = u3 - u2;
+            return h00 * p1 + h10 * m1 + h01 * p2 + h11 * m2;
+        }
+    }
+    kfs[0].1
+}
+
+fn sample_spline_2d(kfs: &[(f32, f32, f32)], t: f32) -> (f32, f32) {
+    let t = t.rem_euclid(1.0);
+    let n = kfs.len();
+    if n == 0 { return (0.0, 0.0); }
+    if n == 1 { return (kfs[0].1, kfs[0].2); }
+    for i in 0..n - 1 {
+        if kfs[i].0 <= t && t <= kfs[i + 1].0 {
+            let i1 = i;
+            let i2 = i + 1;
+            let i0 = i1.saturating_sub(1);
+            let i3 = (i2 + 1).min(n - 1);
+            let (t1, y1, z1) = kfs[i1];
+            let (t2, y2, z2) = kfs[i2];
+            let dt = t2 - t1;
+            if dt < 1e-5 { return (y1, z1); }
+            let u = (t - t1) / dt;
+
+            let my1 = 0.5 * (y2 - kfs[i0].1);
+            let my2 = 0.5 * (kfs[i3].1 - y1);
+            let mz1 = 0.5 * (z2 - kfs[i0].2);
+            let mz2 = 0.5 * (kfs[i3].2 - z1);
+
+            let u2 = u * u;
+            let u3 = u2 * u;
+            let h00 = 2.0 * u3 - 3.0 * u2 + 1.0;
+            let h10 = u3 - 2.0 * u2 + u;
+            let h01 = -2.0 * u3 + 3.0 * u2;
+            let h11 = u3 - u2;
+
+            let y = h00 * y1 + h10 * my1 + h01 * y2 + h11 * my2;
+            let z = h00 * z1 + h10 * mz1 + h01 * z2 + h11 * mz2;
+            return (y, z);
+        }
+    }
+    (kfs[0].1, kfs[0].2)
+}
+
 impl PlayerPoseResult {
     /// Evaluates the complete Bedrock Actions & Stuff kinematic tree for the player using live hot-reload config.
     pub fn evaluate(input: &PlayerAnimInput) -> Self {
@@ -570,103 +686,108 @@ impl PlayerPoseResult {
                 res.left_arm.rotation[0] += phi.sin() * 0.3 * sp;
             }
         } else if is_sprinting {
-            // Bedrock Actions & Stuff athletic sprint dash (Oreville zierfb)
+            // Bedrock Actions & Stuff 100% authentic sprint dash (Oreville zierfb)
             let sprint_phi = phi * 1.4 * cfg.sprint_speed_mult;
-            let bounce = ((sprint_phi * 2.0).cos() * -1.8 - 0.8) * cfg.sprint_bounce_mult;
-            res.body.translation = [0.0, bounce, 2.0];
+            let norm_t = (sprint_phi / (2.0 * std::f32::consts::PI)).rem_euclid(1.0);
+            let bounce = ((norm_t * 1080.0).to_radians().cos() * -2.5) * sp * cfg.sprint_bounce_mult;
+            res.body.translation = [0.0, bounce, 0.75 * sp];
             res.body.rotation = [
                 cfg.sprint_body_pitch_deg.to_radians(),
-                (sprint_phi).sin() * -0.14,
-                (sprint_phi).cos() * -0.08,
-            ];
-
-            res.head.translation = [0.0, bounce, 2.5];
-            res.head.rotation = [
-                input.head_pitch_deg.to_radians() - 0.32,
-                input.head_yaw_deg.to_radians(),
-                (sprint_phi - 0.78).cos() * -0.15,
-            ];
-
-            res.right_arm.translation = [-5.0, 2.0 + bounce, 1.5];
-            res.left_arm.translation = [5.0, 2.0 + bounce, 1.5];
-            res.right_arm.rotation = [
-                -sprint_phi.sin() * cfg.sprint_arm_swing,
-                0.0,
-                0.25,
-            ];
-            res.left_arm.rotation = [
-                sprint_phi.sin() * cfg.sprint_arm_swing,
-                0.0,
-                -0.25,
-            ];
-
-            let r_lift = if sprint_phi.cos() > 0.0 { sprint_phi.cos() * 2.5 } else { 0.0 };
-            let l_lift = if sprint_phi.cos() < 0.0 { -sprint_phi.cos() * 2.5 } else { 0.0 };
-            res.right_leg.translation = [-1.9, 12.0 - r_lift, sprint_phi.sin() * 0.8];
-            res.left_leg.translation = [1.9, 12.0 - l_lift, -sprint_phi.sin() * 0.8];
-            res.right_leg.rotation = [sprint_phi.cos() * 0.95 * cfg.sprint_leg_swing, 0.0, 0.0];
-            res.left_leg.rotation = [-sprint_phi.cos() * 0.95 * cfg.sprint_leg_swing, 0.0, 0.0];
-        } else if is_moving {
-            // Bedrock Actions & Stuff authentic walk cycle (Oreville tldiyl)
-            let step_freq = phi * 1.2 * cfg.walk_speed_mult;
-            let bounce = ((step_freq * 2.0 + 0.2).sin() * 1.2 - 0.8) * sp * cfg.walk_bounce_mult;
-            res.body.translation = [0.0, bounce, 0.6 * sp];
-            // Body stays upright and twists with arm swing (Oreville: cos * 9.6°)
-            res.body.rotation = [
-                cfg.walk_body_pitch_deg.to_radians() * sp,
-                (step_freq + 0.7).cos() * cfg.walk_body_yaw_deg.to_radians() * sp,
-                (step_freq + 0.78).cos() * cfg.walk_body_roll_deg.to_radians() * sp,
+                (norm_t * 540.0).to_radians().sin() * -8.0f32.to_radians(),
+                (norm_t * 540.0).to_radians().cos() * -5.0f32.to_radians(),
             ];
 
             res.head.translation = [0.0, bounce, 1.0 * sp];
             res.head.rotation = [
-                input.head_pitch_deg.to_radians() + (step_freq * 2.0).cos() * 0.10 * sp,
-                input.head_yaw_deg.to_radians() + (step_freq + 0.7).sin() * 0.05 * sp,
-                (step_freq - 0.78).cos() * -0.09 * sp,
+                input.head_pitch_deg.to_radians() - 0.25 + (norm_t * 1080.0).to_radians().sin() * 7.0f32.to_radians(),
+                input.head_yaw_deg.to_radians(),
+                (norm_t * 540.0 - 45.0).to_radians().cos() * -10.0f32.to_radians(),
             ];
 
-            let r_arm_z = (step_freq + 0.7).cos() * 0.8 * sp;
-            let l_arm_z = -(step_freq + 0.7).cos() * 0.8 * sp;
-            res.right_arm.translation = [-5.0, 2.0 + bounce, r_arm_z];
-            res.left_arm.translation = [5.0, 2.0 + bounce, l_arm_z];
+            let r_arm_pitch = (norm_t * 540.0 + 22.0).to_radians().sin() * -40.0f32.to_radians() * cfg.sprint_arm_swing;
+            let l_arm_pitch = (norm_t * 540.0 + 22.0).to_radians().sin() * 40.0f32.to_radians() * cfg.sprint_arm_swing;
+            let arm_roll = (norm_t * 1080.0 + 30.0).to_radians().sin() * 6.0f32.to_radians();
+
+            res.right_arm.translation = [-5.0, 2.0 + bounce, 1.5];
+            res.left_arm.translation = [5.0, 2.0 + bounce, 1.5];
+            res.right_arm.rotation = [r_arm_pitch, 0.0, -arm_roll + 6.0f32.to_radians()];
+            res.left_arm.rotation = [l_arm_pitch, 0.0, arm_roll - 6.0f32.to_radians()];
+
+            let (r_pos_y, r_pos_z) = sample_spline_2d(SPRINT_LEG_POS_KFS, norm_t);
+            let (l_pos_y, l_pos_z) = sample_spline_2d(SPRINT_LEG_POS_KFS, (norm_t + 0.5).rem_euclid(1.0));
+
+            let r_rot = (norm_t * 540.0).to_radians().sin() * 35.0f32.to_radians() * cfg.sprint_leg_swing;
+            let l_rot = -(norm_t * 540.0).to_radians().sin() * 35.0f32.to_radians() * cfg.sprint_leg_swing;
+
+            res.right_leg.translation = [-1.9, 12.0 + r_pos_y * cfg.sprint_leg_swing, r_pos_z * cfg.sprint_leg_swing];
+            res.left_leg.translation = [1.9, 12.0 + l_pos_y * cfg.sprint_leg_swing, l_pos_z * cfg.sprint_leg_swing];
+            res.right_leg.rotation = [r_rot, 0.0, 0.0];
+            res.left_leg.rotation = [l_rot, 0.0, 0.0];
+        } else if is_moving {
+            // Bedrock Actions & Stuff 100% authentic Oreville tldiyl walk cycle with Catmull-Rom splines
+            let norm_t = (phi / (2.0 * std::f32::consts::PI) * cfg.walk_speed_mult).rem_euclid(1.0);
+            let bounce = (norm_t * 720.0 + 12.0).to_radians().sin() * 1.3 * sp * cfg.walk_bounce_mult;
+            res.body.translation = [0.0, bounce, 0.6 * sp];
+            res.body.rotation = [
+                cfg.walk_body_pitch_deg.to_radians() * sp,
+                (norm_t * 360.0 + 40.0).to_radians().cos() * cfg.walk_body_yaw_deg.to_radians() * sp,
+                (norm_t * 360.0 + 45.0).to_radians().cos() * cfg.walk_body_roll_deg.to_radians() * sp,
+            ];
+
+            res.head.translation = [0.0, bounce, 1.0 * sp];
+            res.head.rotation = [
+                input.head_pitch_deg.to_radians() + (norm_t * 720.0).to_radians().cos() * 6.0f32.to_radians() * sp,
+                input.head_yaw_deg.to_radians() + (norm_t * 360.0 + 40.0).to_radians().sin() * 3.0f32.to_radians() * sp,
+                (norm_t * 360.0 - 45.0).to_radians().cos() * -5.4f32.to_radians() * sp,
+            ];
+
+            let r_arm_pitch = (-(norm_t * 360.0).to_radians().sin() * 37.2f32.to_radians() + 1.6f32.to_radians()) * cfg.walk_arm_swing * sp;
+            let l_arm_pitch = ((norm_t * 360.0).to_radians().sin() * 37.2f32.to_radians() + 1.6f32.to_radians()) * cfg.walk_arm_swing * sp;
+            let arm_yaw = -(norm_t * 360.0 + 40.0).to_radians().cos() * 9.6f32.to_radians() * sp;
+
+            res.right_arm.translation = [-5.0, 2.0 + bounce, 0.0];
+            res.left_arm.translation = [5.0, 2.0 + bounce, 0.0];
 
             if input.is_holding_main {
-                // Natural held item carry pose while walking: rests forward with gentle swing
                 res.right_arm.rotation = [
-                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() - (step_freq).sin() * 0.18 * sp,
-                    -0.12,
+                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() + r_arm_pitch * 0.3,
+                    -0.12 + arm_yaw * 0.3,
                     0.18,
                 ];
             } else {
                 res.right_arm.rotation = [
-                    -(step_freq).sin() * cfg.walk_arm_swing * sp,
-                    -(step_freq + 0.7).cos() * 0.168 * sp,
-                    0.16 + (step_freq).sin().abs() * 0.08 * sp,
+                    r_arm_pitch,
+                    arm_yaw,
+                    0.16 + (norm_t * 360.0).to_radians().sin().abs() * 0.08 * sp,
                 ];
             }
 
             if input.is_holding_off {
                 res.left_arm.rotation = [
-                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() + (step_freq).sin() * 0.18 * sp,
-                    0.12,
+                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() + l_arm_pitch * 0.3,
+                    0.12 + arm_yaw * 0.3,
                     -0.18,
                 ];
             } else {
                 res.left_arm.rotation = [
-                    (step_freq).sin() * cfg.walk_arm_swing * sp,
-                    -(step_freq + 0.7).cos() * 0.168 * sp,
-                    -0.16 - (step_freq).sin().abs() * 0.08 * sp,
+                    l_arm_pitch,
+                    arm_yaw,
+                    -0.16 - (norm_t * 360.0).to_radians().sin().abs() * 0.08 * sp,
                 ];
             }
 
-            // Knee lift and stride step (Oreville tldiyl: rightleg y in [-2.95, +2.13])
-            let r_swing = step_freq.cos();
-            let r_lift = if r_swing > 0.0 { r_swing * 2.0 * sp * cfg.walk_leg_swing } else { 0.0 };
-            let l_lift = if r_swing < 0.0 { -r_swing * 2.0 * sp * cfg.walk_leg_swing } else { 0.0 };
-            res.right_leg.translation = [-1.9, 12.0 - r_lift, step_freq.sin() * 0.4 * sp];
-            res.left_leg.translation = [1.9, 12.0 - l_lift, -step_freq.sin() * 0.4 * sp];
-            res.right_leg.rotation = [step_freq.cos() * 0.84 * sp * cfg.walk_leg_swing, 0.0, 0.0];
-            res.left_leg.rotation = [-step_freq.cos() * 0.84 * sp * cfg.walk_leg_swing, 0.0, 0.0];
+            // Exact 100% Catmull-Rom sampled leg strides & lifts from Actions & Stuff
+            let r_rot_deg = sample_spline_1d(RIGHT_LEG_ROT_KFS, norm_t) * cfg.walk_leg_swing;
+            let (r_pos_y, r_pos_z) = sample_spline_2d(RIGHT_LEG_POS_KFS, norm_t);
+
+            let l_norm_t = (norm_t + 0.5).rem_euclid(1.0);
+            let l_rot_deg = sample_spline_1d(RIGHT_LEG_ROT_KFS, l_norm_t) * cfg.walk_leg_swing;
+            let (l_pos_y, l_pos_z) = sample_spline_2d(RIGHT_LEG_POS_KFS, l_norm_t);
+
+            res.right_leg.translation = [-1.9, 12.0 + r_pos_y * sp * cfg.walk_leg_swing, r_pos_z * sp * cfg.walk_leg_swing];
+            res.left_leg.translation = [1.9, 12.0 + l_pos_y * sp * cfg.walk_leg_swing, l_pos_z * sp * cfg.walk_leg_swing];
+            res.right_leg.rotation = [r_rot_deg.to_radians() * sp, 0.0, 0.0];
+            res.left_leg.rotation = [l_rot_deg.to_radians() * sp, 0.0, 0.0];
         } else {
             // Bedrock Actions & Stuff authentic idle breathing (Oreville tdrcwc)
             let breath_phase = t * 2.14;
