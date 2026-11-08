@@ -311,8 +311,8 @@ fn test_tier1_virtual_waist_rigging() {
         * Mat4::from_quat(waist_rotation)
         * Mat4::from_translation(-waist_anchor);
 
-    // Body rest anchor is [0, 24, 0]
-    let transformed_neck = m_waist.transform_point3(JAVA_BODY_ANCHOR);
+    // Head/neck rest anchor is [0, 24, 0]
+    let transformed_neck = m_waist.transform_point3(JAVA_HEAD_ANCHOR);
     // Neck tilts forward (positive Y and Z changes)
     assert!(transformed_neck.y < 24.0, "Neck should lower when leaning forward");
     assert!(transformed_neck.z > 0.0, "Neck should tilt forward in Z");

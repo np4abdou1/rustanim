@@ -234,8 +234,8 @@ fn test_tier3_multi_channel_hierarchy_hip_collapse_immunity() {
         * Mat4::from_quat(waist_rot)
         * Mat4::from_translation(-VIRTUAL_WAIST_ANCHOR);
 
-    // Body anchor [0, 24, 0] transformed through waist
-    let neck_world = m_waist.transform_point3(JAVA_BODY_ANCHOR);
+    // Head/neck anchor [0, 24, 0] transformed through waist
+    let neck_world = m_waist.transform_point3(JAVA_HEAD_ANCHOR);
     // Neck moves forward and downward
     assert!(neck_world.y < 24.0);
     assert!(neck_world.z > 0.0);

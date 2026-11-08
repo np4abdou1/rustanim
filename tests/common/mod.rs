@@ -64,7 +64,7 @@ impl McpackFixture {
 // ---------------------------------------------------------------------------
 
 pub const JAVA_HEAD_ANCHOR: Vec3 = Vec3::new(0.0, 24.0, 0.0);
-pub const JAVA_BODY_ANCHOR: Vec3 = Vec3::new(0.0, 24.0, 0.0);
+pub const JAVA_BODY_ANCHOR: Vec3 = Vec3::new(0.0, 12.0, 0.0);
 pub const JAVA_RIGHT_ARM_ANCHOR: Vec3 = Vec3::new(-5.0, 22.0, 0.0);
 pub const JAVA_LEFT_ARM_ANCHOR: Vec3 = Vec3::new(5.0, 22.0, 0.0);
 pub const JAVA_RIGHT_LEG_ANCHOR: Vec3 = Vec3::new(-1.9, 12.0, 0.0);

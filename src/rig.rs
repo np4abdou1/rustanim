@@ -11,7 +11,7 @@ use crate::anim::FramePose;
 // Canonical Vanilla Java Humanoid Joint Anchors (pixels, 16px = 1 block)
 // ---------------------------------------------------------------------------
 pub const JAVA_HEAD_ANCHOR: Vec3 = Vec3::new(0.0, 24.0, 0.0);
-pub const JAVA_BODY_ANCHOR: Vec3 = Vec3::new(0.0, 24.0, 0.0);
+pub const JAVA_BODY_ANCHOR: Vec3 = Vec3::new(0.0, 12.0, 0.0); // Hips at 12.0 (Bedrock/Actions&Stuff hinge)
 pub const JAVA_RIGHT_ARM_ANCHOR: Vec3 = Vec3::new(-5.0, 22.0, 0.0);
 pub const JAVA_LEFT_ARM_ANCHOR: Vec3 = Vec3::new(5.0, 22.0, 0.0);
 pub const JAVA_RIGHT_LEG_ANCHOR: Vec3 = Vec3::new(-1.9, 12.0, 0.0);
@@ -804,9 +804,9 @@ mod tests {
             r_leg_pos
         );
 
-        // Body should tilt
-        let body_pos = world["body"].transform_point3(JAVA_BODY_ANCHOR);
-        assert!(body_pos.y < 24.0, "Body did not lower during forward waist pitch");
+        // Body/head should tilt and lower forward
+        let head_pos = world["body"].transform_point3(JAVA_HEAD_ANCHOR);
+        assert!(head_pos.y < 24.0, "Head did not lower during forward waist pitch");
     }
 
     #[test]
