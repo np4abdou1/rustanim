@@ -13,6 +13,14 @@ fn default_false() -> bool {
     false
 }
 
+fn default_walk_speed_mult() -> f32 {
+    0.55
+}
+
+fn default_sprint_speed_mult() -> f32 {
+    0.65
+}
+
 fn default_1_0() -> f32 {
     1.0
 }
@@ -96,7 +104,7 @@ pub struct RustanimConfig {
     pub debug_hud: bool,
 
     // Walk settings
-    #[serde(default = "default_1_0")]
+    #[serde(default = "default_walk_speed_mult")]
     pub walk_speed_mult: f32,
     #[serde(default = "default_walk_body_pitch")]
     pub walk_body_pitch_deg: f32,
@@ -116,7 +124,7 @@ pub struct RustanimConfig {
     pub walk_arm_carry_pitch: f32,
 
     // Sprint settings
-    #[serde(default = "default_1_0")]
+    #[serde(default = "default_sprint_speed_mult")]
     pub sprint_speed_mult: f32,
     #[serde(default = "default_sprint_pitch")]
     pub sprint_body_pitch_deg: f32,
