@@ -533,168 +533,185 @@ impl PlayerPoseResult {
         let phi = input.pos * 0.6662;
 
         if input.is_crouching {
-            // Bedrock Actions & Stuff deep ninja stealth crouch
-            res.body.translation = [0.0, 5.5, 3.8];
-            res.body.rotation = [0.68, 0.0, 0.0];
+            // Bedrock Actions & Stuff agile stealth crouch
+            res.body.translation = [0.0, 3.2, 2.0];
+            res.body.rotation = [0.45, 0.0, 0.0];
 
-            res.head.translation = [0.0, 6.0, 5.5];
+            res.head.translation = [0.0, 3.8, 3.0];
             res.head.rotation = [
-                input.head_pitch_deg.to_radians() - 0.55,
+                input.head_pitch_deg.to_radians() - 0.35,
                 input.head_yaw_deg.to_radians(),
                 0.0,
             ];
 
-            res.right_arm.translation = [-5.0, 6.5, 3.8];
-            res.left_arm.translation = [5.0, 6.5, 3.8];
-            res.right_arm.rotation = [-0.65, 0.0, 0.35];
-            res.left_arm.rotation = [-0.65, 0.0, -0.35];
+            res.right_arm.translation = [-5.0, 4.2, 2.0];
+            res.left_arm.translation = [5.0, 4.2, 2.0];
+            res.right_arm.rotation = [-0.35, 0.0, 0.20];
+            res.left_arm.rotation = [-0.35, 0.0, -0.20];
 
-            res.right_leg.translation = [-1.9, 12.2, 5.0];
-            res.left_leg.translation = [1.9, 12.2, 5.0];
+            res.right_leg.translation = [-1.9, 12.0, 3.0];
+            res.left_leg.translation = [1.9, 12.0, 3.0];
 
             if is_moving {
-                let leg_stride = phi.cos() * 0.9 * sp;
+                let leg_stride = phi.cos() * 0.7 * sp;
                 res.right_leg.rotation[0] = leg_stride;
                 res.left_leg.rotation[0] = -leg_stride;
-                res.right_arm.rotation[0] += -phi.sin() * 0.4 * sp;
-                res.left_arm.rotation[0] += phi.sin() * 0.4 * sp;
+                res.right_arm.rotation[0] += -phi.sin() * 0.3 * sp;
+                res.left_arm.rotation[0] += phi.sin() * 0.3 * sp;
             }
         } else if is_sprinting {
-            // Bedrock Actions & Stuff signature athletic sprint dash (47° lean, head up, 100° pump)
-            res.body.translation = [0.0, 3.2, 4.2];
+            // Bedrock Actions & Stuff athletic sprint dash (Oreville zierfb)
+            let sprint_phi = phi * 1.4;
+            let bounce = (sprint_phi * 2.0).cos() * -1.8 - 0.8;
+            res.body.translation = [0.0, bounce, 2.0];
             res.body.rotation = [
-                0.82,
-                -(phi + 0.7).cos() * 0.38,
-                phi.cos() * 0.16,
+                0.38, // 22° forward athletic lean
+                (sprint_phi).sin() * -0.14,
+                (sprint_phi).cos() * -0.08,
             ];
 
-            res.head.translation = [0.0, 2.8, 6.0];
+            res.head.translation = [0.0, bounce, 2.5];
             res.head.rotation = [
-                input.head_pitch_deg.to_radians() - 0.65,
+                input.head_pitch_deg.to_radians() - 0.32,
                 input.head_yaw_deg.to_radians(),
-                0.0,
+                (sprint_phi - 0.78).cos() * -0.15,
             ];
 
-            res.right_arm.translation = [-5.0, 4.5, 4.2];
-            res.left_arm.translation = [5.0, 4.5, 4.2];
+            res.right_arm.translation = [-5.0, 2.0 + bounce, 1.5];
+            res.left_arm.translation = [5.0, 2.0 + bounce, 1.5];
             res.right_arm.rotation = [
-                -phi.sin() * 1.75,
+                -sprint_phi.sin() * 1.15,
                 0.0,
-                0.38 + phi.sin().abs() * 0.22,
+                0.25,
             ];
             res.left_arm.rotation = [
-                phi.sin() * 1.75,
+                sprint_phi.sin() * 1.15,
                 0.0,
-                -0.38 - phi.sin().abs() * 0.22,
+                -0.25,
             ];
 
-            let r_lift = if phi.cos() > 0.0 { phi.cos() * 4.2 } else { 0.0 };
-            let l_lift = if phi.cos() < 0.0 { -phi.cos() * 4.2 } else { 0.0 };
-            res.right_leg.translation = [-1.9, 12.0 - r_lift, -0.8];
-            res.left_leg.translation = [1.9, 12.0 - l_lift, -0.8];
-            res.right_leg.rotation = [phi.cos() * 1.85, 0.0, 0.05];
-            res.left_leg.rotation = [-phi.cos() * 1.85, 0.0, -0.05];
+            let r_lift = if sprint_phi.cos() > 0.0 { sprint_phi.cos() * 2.5 } else { 0.0 };
+            let l_lift = if sprint_phi.cos() < 0.0 { -sprint_phi.cos() * 2.5 } else { 0.0 };
+            res.right_leg.translation = [-1.9, 12.0 - r_lift, sprint_phi.sin() * 0.8];
+            res.left_leg.translation = [1.9, 12.0 - l_lift, -sprint_phi.sin() * 0.8];
+            res.right_leg.rotation = [sprint_phi.cos() * 0.95, 0.0, 0.0];
+            res.left_leg.rotation = [-sprint_phi.cos() * 0.95, 0.0, 0.0];
         } else if is_moving {
-            // Actions & Stuff fluid walk cycle (Oreville tldiyl)
-            let bounce = ((phi * 2.0 + 0.21).sin() * 1.5 - 1.0) * sp;
-            res.body.translation = [0.0, bounce, 1.2 * sp];
+            // Bedrock Actions & Stuff authentic walk cycle (Oreville tldiyl)
+            let step_freq = phi * 1.2;
+            let bounce = ((step_freq * 2.0 + 0.2).sin() * 1.2 - 0.8) * sp;
+            res.body.translation = [0.0, bounce, 0.6 * sp];
+            // Body stays upright and twists with arm swing (Oreville: cos * 9.6°)
             res.body.rotation = [
-                0.22 * sp,
-                -(phi + 0.7).cos() * 0.35 * sp,
-                -(phi + 0.785).cos() * 0.14 * sp,
+                0.04 * sp,
+                (step_freq + 0.7).cos() * 0.168 * sp,
+                (step_freq + 0.78).cos() * -0.052 * sp,
             ];
 
-            res.head.translation = [0.0, bounce, 2.2 * sp];
+            res.head.translation = [0.0, bounce, 1.0 * sp];
             res.head.rotation = [
-                input.head_pitch_deg.to_radians() + (phi * 2.0).cos() * 0.12 * sp,
-                input.head_yaw_deg.to_radians() + (phi + 0.7).sin() * 0.10 * sp,
-                -(phi - 0.785).cos() * 0.12 * sp,
+                input.head_pitch_deg.to_radians() + (step_freq * 2.0).cos() * 0.10 * sp,
+                input.head_yaw_deg.to_radians() + (step_freq + 0.7).sin() * 0.05 * sp,
+                (step_freq - 0.78).cos() * -0.09 * sp,
             ];
 
-            let r_arm_z = 2.0 * sp + (phi + 0.7).cos() * 1.8 * sp;
-            let l_arm_z = 2.0 * sp - (phi + 0.7).cos() * 1.8 * sp;
+            let r_arm_z = (step_freq + 0.7).cos() * 0.8 * sp;
+            let l_arm_z = -(step_freq + 0.7).cos() * 0.8 * sp;
             res.right_arm.translation = [-5.0, 2.0 + bounce, r_arm_z];
             res.left_arm.translation = [5.0, 2.0 + bounce, l_arm_z];
 
             if input.is_holding_main {
+                // Natural held item carry pose while walking: rests forward with gentle swing
                 res.right_arm.rotation = [
-                    -0.95 - phi.sin() * 0.45 * sp,
-                    -0.35,
-                    0.28,
-                ];
-            } else {
-                res.right_arm.rotation = [
-                    -phi.sin() * 0.95 * sp,
-                    -(phi + 0.7).cos() * 0.25 * sp,
-                    0.28 + phi.sin().abs() * 0.18 * sp,
-                ];
-            }
-
-            res.left_arm.rotation = [
-                phi.sin() * 0.95 * sp,
-                -(phi + 0.7).cos() * 0.25 * sp,
-                -0.28 - phi.sin().abs() * 0.18 * sp,
-            ];
-
-            let r_swing = phi.cos();
-            let r_lift = if r_swing > 0.0 { r_swing * 2.8 * sp } else { 0.0 };
-            let l_lift = if r_swing < 0.0 { -r_swing * 2.8 * sp } else { 0.0 };
-            res.right_leg.translation = [-1.9, 12.0 - r_lift, 0.0];
-            res.left_leg.translation = [1.9, 12.0 - l_lift, 0.0];
-            res.right_leg.rotation = [phi.cos() * 1.55 * sp, 0.0, 0.04];
-            res.left_leg.rotation = [-phi.cos() * 1.55 * sp, 0.0, -0.04];
-        } else {
-            // Actions & Stuff signature living idle breathing & heroic combat stance (Oreville tdrcwc)
-            let breath = (t * 2.2).sin();
-            let heave = breath * 1.2;
-
-            res.body.translation = [0.0, heave, 0.0];
-            res.body.rotation = [
-                0.08,
-                (t * 0.8).sin() * 0.06 + 0.12,
-                -(t * 2.14).cos() * 0.04,
-            ];
-
-            res.head.translation = [0.0, heave, 0.0];
-            res.head.rotation = [
-                input.head_pitch_deg.to_radians() + breath * 0.06,
-                input.head_yaw_deg.to_radians() + (t * 1.1 - 0.785).sin() * 0.04 - 0.08,
-                -(t * 1.1 - 0.785).cos() * 0.05,
-            ];
-
-            res.right_arm.translation = [-5.0, 2.0 + heave, 0.0];
-            res.left_arm.translation = [5.0, 2.0 + heave, 0.0];
-
-            if input.is_holding_main {
-                // Signature Actions & Stuff dynamic combat carry pose!
-                res.right_arm.rotation = [
-                    -1.15 + breath * 0.04,
-                    -0.45,
-                    0.35,
-                ];
-            } else {
-                // Relaxed outward flare & natural forward bend
-                res.right_arm.rotation = [
-                    -0.38 + breath * 0.04,
+                    -0.38 - (step_freq).sin() * 0.18 * sp,
                     -0.12,
-                    0.32 + (t * 2.2).cos() * 0.03,
+                    0.18,
+                ];
+            } else {
+                res.right_arm.rotation = [
+                    -(step_freq).sin() * 0.65 * sp,
+                    -(step_freq + 0.7).cos() * 0.168 * sp,
+                    0.16 + (step_freq).sin().abs() * 0.08 * sp,
                 ];
             }
 
             if input.is_holding_off {
-                res.left_arm.rotation = [-0.85, 0.35, -0.28];
+                res.left_arm.rotation = [
+                    -0.38 + (step_freq).sin() * 0.18 * sp,
+                    0.12,
+                    -0.18,
+                ];
             } else {
                 res.left_arm.rotation = [
-                    -0.38 - breath * 0.04,
-                    0.12,
-                    -0.32 - (t * 2.2).cos() * 0.03,
+                    (step_freq).sin() * 0.65 * sp,
+                    -(step_freq + 0.7).cos() * 0.168 * sp,
+                    -0.16 - (step_freq).sin().abs() * 0.08 * sp,
                 ];
             }
 
-            res.right_leg.translation = [-2.1 + (t * 1.1).sin() * 0.15, 12.0, -0.6];
-            res.left_leg.translation = [1.9 + (t * 1.1).sin() * 0.15, 12.0, 0.6];
-            res.right_leg.rotation = [0.12, 0.15, 0.08];
-            res.left_leg.rotation = [-0.05, -0.08, -0.06];
+            // Knee lift and stride step (Oreville tldiyl: rightleg y in [-2.95, +2.13])
+            let r_swing = step_freq.cos();
+            let r_lift = if r_swing > 0.0 { r_swing * 2.0 * sp } else { 0.0 };
+            let l_lift = if r_swing < 0.0 { -r_swing * 2.0 * sp } else { 0.0 };
+            res.right_leg.translation = [-1.9, 12.0 - r_lift, step_freq.sin() * 0.4 * sp];
+            res.left_leg.translation = [1.9, 12.0 - l_lift, -step_freq.sin() * 0.4 * sp];
+            res.right_leg.rotation = [step_freq.cos() * 0.84 * sp, 0.0, 0.0];
+            res.left_leg.rotation = [-step_freq.cos() * 0.84 * sp, 0.0, 0.0];
+        } else {
+            // Bedrock Actions & Stuff authentic idle breathing (Oreville tdrcwc)
+            let breath_phase = t * 2.14;
+            let heave = (breath_phase * 2.0).cos() * 0.2 - 0.15;
+
+            res.body.translation = [0.0, heave, 0.0];
+            res.body.rotation = [
+                0.0,
+                0.0,
+                -breath_phase.cos() * 0.02,
+            ];
+
+            res.head.translation = [0.0, heave, 0.0];
+            res.head.rotation = [
+                input.head_pitch_deg.to_radians() - (breath_phase * 2.0).sin() * 0.035,
+                input.head_yaw_deg.to_radians() - (breath_phase - 0.78).sin() * 0.02,
+                -(breath_phase - 0.78).cos() * 0.05,
+            ];
+
+            res.right_arm.translation = [-5.0, 2.0 + (breath_phase * 2.0).cos() * 0.12, 0.0];
+            res.left_arm.translation = [5.0, 2.0 + (breath_phase * 2.0).cos() * 0.12, 0.0];
+
+            if input.is_holding_main {
+                // Natural holding item pose at rest
+                res.right_arm.rotation = [
+                    -0.38 + (breath_phase * 2.0).sin() * 0.02,
+                    -0.10,
+                    0.16,
+                ];
+            } else {
+                res.right_arm.rotation = [
+                    (breath_phase * 2.0).sin() * 0.02,
+                    0.0,
+                    0.08 + (breath_phase * 2.0).sin() * 0.03,
+                ];
+            }
+
+            if input.is_holding_off {
+                res.left_arm.rotation = [
+                    -0.38 - (breath_phase * 2.0).sin() * 0.02,
+                    0.10,
+                    -0.16,
+                ];
+            } else {
+                res.left_arm.rotation = [
+                    -(breath_phase * 2.0).sin() * 0.02,
+                    0.0,
+                    -0.08 - (breath_phase * 2.0).sin() * 0.03,
+                ];
+            }
+
+            res.right_leg.translation = [-1.9, 12.0, 0.0];
+            res.left_leg.translation = [1.9, 12.0, 0.0];
+            res.right_leg.rotation = [0.0, 0.0, breath_phase.sin() * 0.02];
+            res.left_leg.rotation = [0.0, 0.0, breath_phase.sin() * 0.02];
         }
 
         // Dynamic attack slash (Oreville vvnkii)
@@ -865,18 +882,18 @@ mod tests {
         let idle_pose = PlayerPoseResult::evaluate(&idle_input);
         // Idle pose must have natural breathing heave and relaxed outward arm roll
         assert!(idle_pose.body.translation[1].abs() > 0.0);
-        assert!(idle_pose.right_arm.rotation[2] > 0.1); // Outward roll > 5 deg
-        assert!(idle_pose.left_arm.rotation[2] < -0.1); // Outward roll < -5 deg
+        assert!(idle_pose.right_arm.rotation[2] > 0.04); // Outward relaxed roll
+        assert!(idle_pose.left_arm.rotation[2] < -0.04);
 
-        // Sprint pose must have forward dash lean >= 25 degrees (0.43 rad)
+        // Sprint pose must have forward dash lean (0.38 rad = 22 deg)
         let sprint_input = PlayerAnimInput {
             speed: 1.2,
             pos: 2.35, // Near peak of arm swing (phi ~ 1.57 rad)
             ..idle_input
         };
         let sprint_pose = PlayerPoseResult::evaluate(&sprint_input);
-        assert!(sprint_pose.body.rotation[0] >= 0.50);
-        assert!(sprint_pose.right_arm.rotation[0].abs() > 0.5);
+        assert!(sprint_pose.body.rotation[0] >= 0.35);
+        assert!(sprint_pose.right_arm.rotation[0].abs() > 0.3);
 
         // Sword hold pose
         let sword_input = PlayerAnimInput {
@@ -884,6 +901,6 @@ mod tests {
             ..idle_input
         };
         let sword_pose = PlayerPoseResult::evaluate(&sword_input);
-        assert!(sword_pose.right_arm.rotation[0] < -0.5); // Arm held up at ~37 deg
+        assert!(sword_pose.right_arm.rotation[0] < -0.3); // Arm held naturally near chest (-22 deg)
     }
 }
