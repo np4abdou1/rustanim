@@ -523,8 +523,18 @@ pub struct PlayerAnimInput {
 }
 
 impl PlayerPoseResult {
-    /// Evaluates the complete Bedrock Actions & Stuff kinematic tree for the player.
+    /// Evaluates the complete Bedrock Actions & Stuff kinematic tree for the player using live hot-reload config.
     pub fn evaluate(input: &PlayerAnimInput) -> Self {
+        let cfg = crate::config::get_live_config();
+        Self::evaluate_with_config(input, &cfg)
+    }
+
+    /// Evaluates the complete Bedrock Actions & Stuff kinematic tree for the player with a specific config.
+    pub fn evaluate_with_config(input: &PlayerAnimInput, cfg: &crate::config::RustanimConfig) -> Self {
+        if !cfg.enabled || !cfg.player_animations {
+            return Self::default();
+        }
+
         let mut res = Self::default();
         let t = input.age * 0.05;
         let is_moving = input.speed > 0.05;
@@ -534,10 +544,10 @@ impl PlayerPoseResult {
 
         if input.is_crouching {
             // Bedrock Actions & Stuff agile stealth crouch
-            res.body.translation = [0.0, 3.2, 2.0];
-            res.body.rotation = [0.45, 0.0, 0.0];
+            res.body.translation = [0.0, cfg.crouch_body_y, cfg.crouch_body_z];
+            res.body.rotation = [cfg.crouch_body_pitch_deg.to_radians(), 0.0, 0.0];
 
-            res.head.translation = [0.0, 3.8, 3.0];
+            res.head.translation = [0.0, cfg.crouch_body_y + 0.6, cfg.crouch_body_z + 1.0];
             res.head.rotation = [
                 input.head_pitch_deg.to_radians() - 0.35,
                 input.head_yaw_deg.to_radians(),
@@ -561,11 +571,11 @@ impl PlayerPoseResult {
             }
         } else if is_sprinting {
             // Bedrock Actions & Stuff athletic sprint dash (Oreville zierfb)
-            let sprint_phi = phi * 1.4;
-            let bounce = (sprint_phi * 2.0).cos() * -1.8 - 0.8;
+            let sprint_phi = phi * 1.4 * cfg.sprint_speed_mult;
+            let bounce = ((sprint_phi * 2.0).cos() * -1.8 - 0.8) * cfg.sprint_bounce_mult;
             res.body.translation = [0.0, bounce, 2.0];
             res.body.rotation = [
-                0.38, // 22° forward athletic lean
+                cfg.sprint_body_pitch_deg.to_radians(),
                 (sprint_phi).sin() * -0.14,
                 (sprint_phi).cos() * -0.08,
             ];
@@ -580,12 +590,12 @@ impl PlayerPoseResult {
             res.right_arm.translation = [-5.0, 2.0 + bounce, 1.5];
             res.left_arm.translation = [5.0, 2.0 + bounce, 1.5];
             res.right_arm.rotation = [
-                -sprint_phi.sin() * 1.15,
+                -sprint_phi.sin() * cfg.sprint_arm_swing,
                 0.0,
                 0.25,
             ];
             res.left_arm.rotation = [
-                sprint_phi.sin() * 1.15,
+                sprint_phi.sin() * cfg.sprint_arm_swing,
                 0.0,
                 -0.25,
             ];
@@ -594,18 +604,18 @@ impl PlayerPoseResult {
             let l_lift = if sprint_phi.cos() < 0.0 { -sprint_phi.cos() * 2.5 } else { 0.0 };
             res.right_leg.translation = [-1.9, 12.0 - r_lift, sprint_phi.sin() * 0.8];
             res.left_leg.translation = [1.9, 12.0 - l_lift, -sprint_phi.sin() * 0.8];
-            res.right_leg.rotation = [sprint_phi.cos() * 0.95, 0.0, 0.0];
-            res.left_leg.rotation = [-sprint_phi.cos() * 0.95, 0.0, 0.0];
+            res.right_leg.rotation = [sprint_phi.cos() * 0.95 * cfg.sprint_leg_swing, 0.0, 0.0];
+            res.left_leg.rotation = [-sprint_phi.cos() * 0.95 * cfg.sprint_leg_swing, 0.0, 0.0];
         } else if is_moving {
             // Bedrock Actions & Stuff authentic walk cycle (Oreville tldiyl)
-            let step_freq = phi * 1.2;
-            let bounce = ((step_freq * 2.0 + 0.2).sin() * 1.2 - 0.8) * sp;
+            let step_freq = phi * 1.2 * cfg.walk_speed_mult;
+            let bounce = ((step_freq * 2.0 + 0.2).sin() * 1.2 - 0.8) * sp * cfg.walk_bounce_mult;
             res.body.translation = [0.0, bounce, 0.6 * sp];
             // Body stays upright and twists with arm swing (Oreville: cos * 9.6°)
             res.body.rotation = [
-                0.04 * sp,
-                (step_freq + 0.7).cos() * 0.168 * sp,
-                (step_freq + 0.78).cos() * -0.052 * sp,
+                cfg.walk_body_pitch_deg.to_radians() * sp,
+                (step_freq + 0.7).cos() * cfg.walk_body_yaw_deg.to_radians() * sp,
+                (step_freq + 0.78).cos() * cfg.walk_body_roll_deg.to_radians() * sp,
             ];
 
             res.head.translation = [0.0, bounce, 1.0 * sp];
@@ -623,13 +633,13 @@ impl PlayerPoseResult {
             if input.is_holding_main {
                 // Natural held item carry pose while walking: rests forward with gentle swing
                 res.right_arm.rotation = [
-                    -0.38 - (step_freq).sin() * 0.18 * sp,
+                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() - (step_freq).sin() * 0.18 * sp,
                     -0.12,
                     0.18,
                 ];
             } else {
                 res.right_arm.rotation = [
-                    -(step_freq).sin() * 0.65 * sp,
+                    -(step_freq).sin() * cfg.walk_arm_swing * sp,
                     -(step_freq + 0.7).cos() * 0.168 * sp,
                     0.16 + (step_freq).sin().abs() * 0.08 * sp,
                 ];
@@ -637,13 +647,13 @@ impl PlayerPoseResult {
 
             if input.is_holding_off {
                 res.left_arm.rotation = [
-                    -0.38 + (step_freq).sin() * 0.18 * sp,
+                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() + (step_freq).sin() * 0.18 * sp,
                     0.12,
                     -0.18,
                 ];
             } else {
                 res.left_arm.rotation = [
-                    (step_freq).sin() * 0.65 * sp,
+                    (step_freq).sin() * cfg.walk_arm_swing * sp,
                     -(step_freq + 0.7).cos() * 0.168 * sp,
                     -0.16 - (step_freq).sin().abs() * 0.08 * sp,
                 ];
@@ -651,12 +661,12 @@ impl PlayerPoseResult {
 
             // Knee lift and stride step (Oreville tldiyl: rightleg y in [-2.95, +2.13])
             let r_swing = step_freq.cos();
-            let r_lift = if r_swing > 0.0 { r_swing * 2.0 * sp } else { 0.0 };
-            let l_lift = if r_swing < 0.0 { -r_swing * 2.0 * sp } else { 0.0 };
+            let r_lift = if r_swing > 0.0 { r_swing * 2.0 * sp * cfg.walk_leg_swing } else { 0.0 };
+            let l_lift = if r_swing < 0.0 { -r_swing * 2.0 * sp * cfg.walk_leg_swing } else { 0.0 };
             res.right_leg.translation = [-1.9, 12.0 - r_lift, step_freq.sin() * 0.4 * sp];
             res.left_leg.translation = [1.9, 12.0 - l_lift, -step_freq.sin() * 0.4 * sp];
-            res.right_leg.rotation = [step_freq.cos() * 0.84 * sp, 0.0, 0.0];
-            res.left_leg.rotation = [-step_freq.cos() * 0.84 * sp, 0.0, 0.0];
+            res.right_leg.rotation = [step_freq.cos() * 0.84 * sp * cfg.walk_leg_swing, 0.0, 0.0];
+            res.left_leg.rotation = [-step_freq.cos() * 0.84 * sp * cfg.walk_leg_swing, 0.0, 0.0];
         } else {
             // Bedrock Actions & Stuff authentic idle breathing (Oreville tdrcwc)
             let breath_phase = t * 2.14;

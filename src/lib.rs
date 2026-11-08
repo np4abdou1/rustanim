@@ -3,10 +3,12 @@
 
 pub mod anim;
 pub mod attachable;
+pub mod config;
 pub mod mcpack;
 pub mod molang;
 pub mod rig;
 
+pub use config::{get_live_config, set_config_path, RustanimConfig};
 pub use anim::{
     AnimChannel, AnimCoord, AnimVector, AnimationClip, AnimationController, AnimationFile,
     BedrockAnimationFile, BedrockAnimationClip, BedrockBoneAnimation, BoneAnimation, BoneChannel,
