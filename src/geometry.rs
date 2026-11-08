@@ -156,6 +156,255 @@ pub struct BedrockVertex {
 }
 
 impl BedrockModel {
+    /// Returns a full Bedrock humanoid model (Steve/Alex) with standard Bedrock bone hierarchy and cubes.
+    pub fn new_bedrock_humanoid(is_slim: bool) -> Self {
+        let arm_w = if is_slim { 3.0 } else { 4.0 };
+        let r_arm_x = if is_slim { -7.0 } else { -8.0 };
+        let r_pivot_x = if is_slim { -4.5 } else { -5.0 };
+        let l_pivot_x = if is_slim { 4.5 } else { 5.0 };
+
+        let bones = vec![
+            BedrockBone {
+                name: "root".into(),
+                parent: None,
+                pivot: [0.0, 0.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: Vec::new(),
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "waist".into(),
+                parent: Some("root".into()),
+                pivot: [0.0, 12.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: Vec::new(),
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "body".into(),
+                parent: Some("waist".into()),
+                pivot: [0.0, 24.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: vec![
+                    // Torso
+                    BedrockCube {
+                        origin: [-4.0, 12.0, -2.0],
+                        size: [8.0, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([16.0, 16.0])),
+                        inflate: None,
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                    // Jacket
+                    BedrockCube {
+                        origin: [-4.0, 12.0, -2.0],
+                        size: [8.0, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([16.0, 32.0])),
+                        inflate: Some(0.25),
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                ],
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "head".into(),
+                parent: Some("body".into()),
+                pivot: [0.0, 24.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: vec![
+                    // Head
+                    BedrockCube {
+                        origin: [-4.0, 24.0, -4.0],
+                        size: [8.0, 8.0, 8.0],
+                        uv: Some(CubeUv::Box([0.0, 0.0])),
+                        inflate: None,
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                    // Hat
+                    BedrockCube {
+                        origin: [-4.0, 24.0, -4.0],
+                        size: [8.0, 8.0, 8.0],
+                        uv: Some(CubeUv::Box([32.0, 0.0])),
+                        inflate: Some(0.5),
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                ],
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "rightarm".into(),
+                parent: Some("body".into()),
+                pivot: [r_pivot_x, 22.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: vec![
+                    // Right Arm
+                    BedrockCube {
+                        origin: [r_arm_x, 12.0, -2.0],
+                        size: [arm_w, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([40.0, 16.0])),
+                        inflate: None,
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                    // Right Sleeve
+                    BedrockCube {
+                        origin: [r_arm_x, 12.0, -2.0],
+                        size: [arm_w, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([40.0, 32.0])),
+                        inflate: Some(0.25),
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                ],
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "leftarm".into(),
+                parent: Some("body".into()),
+                pivot: [l_pivot_x, 22.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: vec![
+                    // Left Arm
+                    BedrockCube {
+                        origin: [4.0, 12.0, -2.0],
+                        size: [arm_w, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([32.0, 48.0])),
+                        inflate: None,
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                    // Left Sleeve
+                    BedrockCube {
+                        origin: [4.0, 12.0, -2.0],
+                        size: [arm_w, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([48.0, 48.0])),
+                        inflate: Some(0.25),
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                ],
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "rightleg".into(),
+                parent: Some("root".into()),
+                pivot: [-1.9, 12.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: vec![
+                    // Right Leg
+                    BedrockCube {
+                        origin: [-3.9, 0.0, -2.0],
+                        size: [4.0, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([0.0, 16.0])),
+                        inflate: None,
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                    // Right Pants
+                    BedrockCube {
+                        origin: [-3.9, 0.0, -2.0],
+                        size: [4.0, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([0.0, 32.0])),
+                        inflate: Some(0.25),
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                ],
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+            BedrockBone {
+                name: "leftleg".into(),
+                parent: Some("root".into()),
+                pivot: [1.9, 12.0, 0.0],
+                rotation: None,
+                bind_pose_rotation: None,
+                binding: None,
+                cubes: vec![
+                    // Left Leg
+                    BedrockCube {
+                        origin: [-0.1, 0.0, -2.0],
+                        size: [4.0, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([16.0, 48.0])),
+                        inflate: None,
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                    // Left Pants
+                    BedrockCube {
+                        origin: [-0.1, 0.0, -2.0],
+                        size: [4.0, 12.0, 4.0],
+                        uv: Some(CubeUv::Box([0.0, 48.0])),
+                        inflate: Some(0.25),
+                        mirror: None,
+                        pivot: None,
+                        rotation: None,
+                    },
+                ],
+                locators: HashMap::new(),
+                neverrender: None,
+                reset: None,
+            },
+        ];
+
+        Self {
+            description: GeometryDescription {
+                identifier: if is_slim {
+                    "geometry.humanoid.customSlim".into()
+                } else {
+                    "geometry.humanoid.custom".into()
+                },
+                texture_width: 64.0,
+                texture_height: 64.0,
+                visible_bounds_width: Some(3.0),
+                visible_bounds_height: Some(3.0),
+                visible_bounds_offset: Some([0.0, 1.0, 0.0]),
+            },
+            bones,
+        }
+    }
+
     /// Builds bone parent-child index and returns sorted bone indices in parent-before-child topological order.
     pub fn topological_order(&self) -> Vec<usize> {
         let name_to_idx: HashMap<&str, usize> = self
@@ -267,6 +516,133 @@ impl BedrockModel {
             for cube in &bone.cubes {
                 generate_cube_vertices(cube, bone_m, base_transform, tex_w, tex_h, out);
             }
+        }
+    }
+
+    /// Evaluates Actions & Stuff kinematics on the Bedrock humanoid model and generates textured vertices
+    /// in Horizon's coordinate system (Y-down, feet at -1.5, units in blocks).
+    pub fn generate_bedrock_player_mesh(
+        &self,
+        input: &crate::rig::PlayerAnimInput,
+        cfg: &crate::config::RustanimConfig,
+        base_world: Mat4,
+        atlas_uv: [f32; 4],
+        out: &mut Vec<BedrockVertex>,
+    ) {
+        let mut overrides: HashMap<&str, (Vec3, Vec3, Vec3)> = HashMap::new();
+
+        let sp = input.speed.clamp(0.0, 1.5);
+        let phi = input.pos;
+        let t = input.age;
+
+        if sp > 0.05 {
+            let is_sprint = sp > 0.85;
+            if is_sprint {
+                let norm_t = (phi / (2.0 * std::f32::consts::PI) * cfg.sprint_speed_mult).rem_euclid(1.0);
+                let w_rot = Vec3::new(0.0, 0.0, -(norm_t * 360.0).to_radians().cos() * 5.0);
+                let bounce = -(norm_t * 720.0).to_radians().cos() * 3.1
+                    + (-(norm_t * 720.0).to_radians().cos() * 2.3).min(0.0);
+                let w_pos = Vec3::new(0.0, bounce * cfg.sprint_bounce_mult, 0.0);
+                overrides.insert("waist", (w_pos, w_rot, Vec3::ONE));
+
+                let b_rot = Vec3::new(
+                    cfg.sprint_body_pitch_deg,
+                    -(norm_t * 360.0).to_radians().sin() * 24.0,
+                    0.0,
+                );
+                overrides.insert("body", (Vec3::ZERO, b_rot, Vec3::ONE));
+
+                let h_rot = Vec3::new(
+                    input.head_pitch_deg - cfg.sprint_body_pitch_deg * 0.7,
+                    input.head_yaw_deg,
+                    -(norm_t * 360.0).to_radians().sin() * 6.0,
+                );
+                overrides.insert("head", (Vec3::ZERO, h_rot, Vec3::ONE));
+
+                let r_arm_pitch = (-(norm_t * 360.0 + 10.0).to_radians().sin() * 55.0) * cfg.sprint_arm_swing;
+                let l_arm_pitch = ((norm_t * 360.0 + 10.0).to_radians().sin() * 55.0) * cfg.sprint_arm_swing;
+                let arm_yaw = (norm_t * 360.0).to_radians().sin() * 18.0;
+
+                overrides.insert("rightarm", (Vec3::ZERO, Vec3::new(r_arm_pitch, arm_yaw, 15.0), Vec3::ONE));
+                overrides.insert("leftarm", (Vec3::ZERO, Vec3::new(l_arm_pitch, arm_yaw, -15.0), Vec3::ONE));
+
+                let (r_pos_y, r_pos_z) = crate::rig::sample_spline_2d(crate::rig::SPRINT_LEG_POS_KFS, norm_t);
+                let r_rot_deg = -(norm_t * 360.0).to_radians().sin() * 68.0 * cfg.sprint_leg_swing;
+                overrides.insert("rightleg", (Vec3::new(0.0, r_pos_y, r_pos_z), Vec3::new(r_rot_deg, 0.0, 0.0), Vec3::ONE));
+
+                let l_norm_t = (norm_t + 0.5).rem_euclid(1.0);
+                let (l_pos_y, l_pos_z) = crate::rig::sample_spline_2d(crate::rig::SPRINT_LEG_POS_KFS, l_norm_t);
+                let l_rot_deg = -(l_norm_t * 360.0).to_radians().sin() * 68.0 * cfg.sprint_leg_swing;
+                overrides.insert("leftleg", (Vec3::new(0.0, l_pos_y, l_pos_z), Vec3::new(l_rot_deg, 0.0, 0.0), Vec3::ONE));
+            } else {
+                let norm_t = (phi / (2.0 * std::f32::consts::PI) * cfg.walk_speed_mult).rem_euclid(1.0);
+                let bounce = (norm_t * 720.0 + 12.0).to_radians().sin() * 1.3 * sp * cfg.walk_bounce_mult;
+                let w_pos = Vec3::new(0.0, bounce, 0.6 * sp);
+                let w_rot = Vec3::new(0.0, 0.0, (norm_t * 360.0 + 45.0).to_radians().cos() * cfg.walk_body_roll_deg * sp);
+                overrides.insert("waist", (w_pos, w_rot, Vec3::ONE));
+
+                let b_rot = Vec3::new(
+                    cfg.walk_body_pitch_deg * sp,
+                    (norm_t * 360.0 + 40.0).to_radians().cos() * cfg.walk_body_yaw_deg * sp,
+                    0.0,
+                );
+                overrides.insert("body", (Vec3::ZERO, b_rot, Vec3::ONE));
+
+                let h_rot = Vec3::new(
+                    input.head_pitch_deg + (norm_t * 720.0).to_radians().cos() * 6.0 * sp,
+                    input.head_yaw_deg + (norm_t * 360.0 + 40.0).to_radians().sin() * 3.0 * sp,
+                    (norm_t * 360.0 - 45.0).to_radians().cos() * -5.4 * sp,
+                );
+                overrides.insert("head", (Vec3::ZERO, h_rot, Vec3::ONE));
+
+                let r_arm_pitch = (-(norm_t * 360.0).to_radians().sin() * 37.2 + 1.6) * cfg.walk_arm_swing * sp;
+                let l_arm_pitch = ((norm_t * 360.0).to_radians().sin() * 37.2 + 1.6) * cfg.walk_arm_swing * sp;
+                let arm_yaw = -(norm_t * 360.0 + 40.0).to_radians().cos() * 9.6 * sp;
+
+                overrides.insert("rightarm", (Vec3::ZERO, Vec3::new(r_arm_pitch, arm_yaw, 9.2), Vec3::ONE));
+                overrides.insert("leftarm", (Vec3::ZERO, Vec3::new(l_arm_pitch, arm_yaw, -9.2), Vec3::ONE));
+
+                let r_rot_deg = crate::rig::sample_spline_1d(crate::rig::RIGHT_LEG_ROT_KFS, norm_t) * cfg.walk_leg_swing;
+                let (r_pos_y, r_pos_z) = crate::rig::sample_spline_2d(crate::rig::RIGHT_LEG_POS_KFS, norm_t);
+                overrides.insert("rightleg", (Vec3::new(0.0, r_pos_y * sp, r_pos_z * sp), Vec3::new(r_rot_deg * sp, 0.0, 0.0), Vec3::ONE));
+
+                let l_norm_t = (norm_t + 0.5).rem_euclid(1.0);
+                let l_rot_deg = crate::rig::sample_spline_1d(crate::rig::RIGHT_LEG_ROT_KFS, l_norm_t) * cfg.walk_leg_swing;
+                let (l_pos_y, l_pos_z) = crate::rig::sample_spline_2d(crate::rig::RIGHT_LEG_POS_KFS, l_norm_t);
+                overrides.insert("leftleg", (Vec3::new(0.0, l_pos_y * sp, l_pos_z * sp), Vec3::new(l_rot_deg * sp, 0.0, 0.0), Vec3::ONE));
+            }
+        } else {
+            // Idle breathing
+            let breath = t * 2.14;
+            let heave = (breath * 2.0).cos() * 0.15 - 0.15;
+            overrides.insert("waist", (Vec3::new((breath).sin() * 0.25, heave, 0.0), Vec3::new(0.0, 0.0, -(breath).cos() * 1.0), Vec3::ONE));
+            overrides.insert("body", (Vec3::ZERO, Vec3::new(0.0, (breath * 0.5).sin() * 1.5, 0.0), Vec3::ONE));
+            overrides.insert("head", (Vec3::ZERO, Vec3::new(input.head_pitch_deg + (breath * 0.5).sin() * 1.5, input.head_yaw_deg + (breath * 0.5).cos() * 0.8, (breath * 0.5).sin() * 1.0), Vec3::ONE));
+            overrides.insert("rightarm", (Vec3::ZERO, Vec3::new((breath).sin() * 1.2, 0.0, 8.5 + (breath).cos() * 0.8), Vec3::ONE));
+            overrides.insert("leftarm", (Vec3::ZERO, Vec3::new(-(breath).sin() * 1.2, 0.0, -8.5 - (breath).cos() * 0.8), Vec3::ONE));
+        }
+
+        let world_matrices = self.evaluate_bone_matrices(Some(&overrides));
+
+        let c = Mat4::from_cols_array(&[
+            -1.0 / 16.0,  0.0,         0.0,        0.0,
+             0.0,        -1.0 / 16.0,  0.0,        0.0,
+             0.0,         0.0,         1.0 / 16.0, 0.0,
+             0.0,         1.5,         0.0,        1.0,
+        ]);
+        let total_base = base_world * c;
+
+        let start_idx = out.len();
+        self.generate_mesh(&world_matrices, total_base, out);
+
+        let u_min = atlas_uv[0];
+        let v_min = atlas_uv[1];
+        let du = atlas_uv[2] - atlas_uv[0];
+        let dv = atlas_uv[3] - atlas_uv[1];
+
+        for v in &mut out[start_idx..] {
+            v.uv[0] = u_min + du * v.uv[0];
+            v.uv[1] = v_min + dv * v.uv[1];
         }
     }
 }
@@ -509,6 +885,40 @@ mod tests {
         model.generate_mesh(&matrices, Mat4::IDENTITY, &mut vertices);
         // 1 cube * 6 faces * 2 triangles * 3 vertices = 36 vertices
         assert_eq!(vertices.len(), 36);
+    }
+
+    #[test]
+    fn test_bedrock_humanoid_mesh_generation() {
+        let model = BedrockModel::new_bedrock_humanoid(false);
+        assert_eq!(model.bones.len(), 8);
+
+        let input = crate::rig::PlayerAnimInput {
+            age: 10.0,
+            pos: 5.0,
+            speed: 1.0,
+            head_pitch_deg: 10.0,
+            head_yaw_deg: -15.0,
+            swing: 0.0,
+            is_crouching: false,
+            is_holding_main: false,
+            is_holding_off: false,
+            is_swing_right: true,
+            is_fall_flying: false,
+        };
+        let cfg = crate::config::RustanimConfig::default();
+        let mut vertices = Vec::new();
+        model.generate_bedrock_player_mesh(&input, &cfg, Mat4::IDENTITY, [0.0, 0.0, 1.0, 1.0], &mut vertices);
+
+        // 8 bones with multiple cubes (head, hat, body, jacket, 2 arms + sleeves, 2 legs + pants)
+        // Each cube = 36 vertices
+        assert!(vertices.len() >= 36 * 8, "Expected at least {} vertices, got {}", 36 * 8, vertices.len());
+        for v in &vertices {
+            assert!(v.pos[0].is_finite());
+            assert!(v.pos[1].is_finite());
+            assert!(v.pos[2].is_finite());
+            assert!(v.uv[0] >= 0.0 && v.uv[0] <= 1.0);
+            assert!(v.uv[1] >= 0.0 && v.uv[1] <= 1.0);
+        }
     }
 
     #[test]

@@ -522,7 +522,7 @@ pub struct PlayerAnimInput {
     pub is_fall_flying: bool,
 }
 
-const RIGHT_LEG_ROT_KFS: &[(f32, f32)] = &[
+pub(crate) const RIGHT_LEG_ROT_KFS: &[(f32, f32)] = &[
     (0.0000, -2.36),
     (0.2778, 38.40),
     (0.3333, 48.30),
@@ -536,7 +536,7 @@ const RIGHT_LEG_ROT_KFS: &[(f32, f32)] = &[
     (1.0000, -2.36),
 ];
 
-const RIGHT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
+pub(crate) const RIGHT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
     (0.0000, -0.15, 0.40),
     (0.1667, -0.60, 1.00),
     (0.2222, -0.96, 1.10),
@@ -554,7 +554,7 @@ const RIGHT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
     (1.0000, -0.15, 0.40),
 ];
 
-const SPRINT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
+pub(crate) const SPRINT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
     (0.0000, -0.15, -0.50),
     (0.0417, -0.40, -0.13),
     (0.0833, -1.20, 0.40),
@@ -569,7 +569,7 @@ const SPRINT_LEG_POS_KFS: &[(f32, f32, f32)] = &[
     (0.6667, -0.15, -0.50),
 ];
 
-fn sample_spline_1d(kfs: &[(f32, f32)], t: f32) -> f32 {
+pub(crate) fn sample_spline_1d(kfs: &[(f32, f32)], t: f32) -> f32 {
     let t = t.rem_euclid(1.0);
     let n = kfs.len();
     if n == 0 { return 0.0; }
@@ -601,7 +601,7 @@ fn sample_spline_1d(kfs: &[(f32, f32)], t: f32) -> f32 {
     kfs[0].1
 }
 
-fn sample_spline_2d(kfs: &[(f32, f32, f32)], t: f32) -> (f32, f32) {
+pub(crate) fn sample_spline_2d(kfs: &[(f32, f32, f32)], t: f32) -> (f32, f32) {
     let t = t.rem_euclid(1.0);
     let n = kfs.len();
     if n == 0 { return (0.0, 0.0); }
