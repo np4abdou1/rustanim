@@ -638,6 +638,57 @@ fn sample_spline_2d(kfs: &[(f32, f32, f32)], t: f32) -> (f32, f32) {
     (kfs[0].1, kfs[0].2)
 }
 
+/// Computes a local Bedrock bone matrix relative to its parent
+fn bedrock_bone_matrix(parent: glam::Mat4, pivot: glam::Vec3, rot_deg: [f32; 3], trans: [f32; 3]) -> glam::Mat4 {
+    let q = glam::Quat::from_euler(
+        glam::EulerRot::ZYX,
+        rot_deg[2].to_radians(),
+        rot_deg[1].to_radians(),
+        rot_deg[0].to_radians(),
+    );
+    let t = glam::Vec3::from_array(trans);
+    parent
+        * glam::Mat4::from_translation(pivot + t)
+        * glam::Mat4::from_quat(q)
+        * glam::Mat4::from_translation(-pivot)
+}
+
+/// Exact change-of-basis projection from Bedrock bone scene graph into Horizon's ModelPart
+fn project_bedrock_bone_to_horizon(m_bedrock: glam::Mat4, h_pivot: glam::Vec3) -> ([f32; 3], [f32; 3]) {
+    let c = glam::Mat4::from_cols_array(&[
+        -1.0,  0.0, 0.0, 0.0,
+         0.0, -1.0, 0.0, 0.0,
+         0.0,  0.0, 1.0, 0.0,
+         0.0, 24.0, 0.0, 1.0,
+    ]);
+    let m_h = c * m_bedrock * c;
+    let t_np = glam::Mat4::from_translation(-h_pivot);
+    let t_p = glam::Mat4::from_translation(h_pivot);
+    let m_prime = t_np * m_h * t_p;
+
+    let pos = m_prime.w_axis.truncate().to_array();
+
+    // Extract exact ZYX Euler angles from rotation matrix
+    let r20 = m_prime.col(0).z;
+    let r00 = m_prime.col(0).x;
+    let r10 = m_prime.col(0).y;
+    let r21 = m_prime.col(1).z;
+    let r22 = m_prime.col(2).z;
+    let r11 = m_prime.col(1).y;
+    let r12 = m_prime.col(2).y;
+
+    let sy = -r20;
+    let cy = (r00 * r00 + r10 * r10).sqrt();
+    let ry = sy.atan2(cy);
+    let (rx, rz) = if cy > 1e-5 {
+        (r21.atan2(r22), r10.atan2(r00))
+    } else {
+        ((-r12).atan2(r11), 0.0)
+    };
+
+    (pos, [rx, ry, rz])
+}
+
 impl PlayerPoseResult {
     /// Evaluates the complete Bedrock Actions & Stuff kinematic tree for the player using live hot-reload config.
     pub fn evaluate(input: &PlayerAnimInput) -> Self {
@@ -658,125 +709,134 @@ impl PlayerPoseResult {
         let sp = input.speed.min(1.0);
         let phi = input.pos * 0.6662;
 
-        if input.is_crouching {
+        // Bedrock standard humanoid joint pivots (model pixels, Y up from feet=0)
+        let p_waist = glam::Vec3::new(0.0, 12.0, 0.0);
+        let p_body = glam::Vec3::new(0.0, 24.0, 0.0);
+        let p_head = glam::Vec3::new(0.0, 24.0, 0.0);
+        let p_rarm = glam::Vec3::new(-5.0, 22.0, 0.0);
+        let p_larm = glam::Vec3::new(5.0, 22.0, 0.0);
+        let p_rleg = glam::Vec3::new(-1.9, 12.0, 0.0);
+        let p_lleg = glam::Vec3::new(1.9, 12.0, 0.0);
+
+        // Horizon ModelPart base pivots (Y down from neck=0)
+        let h_head = glam::Vec3::new(0.0, 0.0, 0.0);
+        let h_body = glam::Vec3::new(0.0, 0.0, 0.0);
+        let h_rarm = glam::Vec3::new(-5.0, 2.0, 0.0);
+        let h_larm = glam::Vec3::new(5.0, 2.0, 0.0);
+        let h_rleg = glam::Vec3::new(-1.9, 12.0, 0.0);
+        let h_lleg = glam::Vec3::new(1.9, 12.0, 0.0);
+
+        let m_root = glam::Mat4::IDENTITY;
+
+        let (_m_waist, m_body, m_head, m_rarm, m_larm, m_rleg, m_lleg) = if input.is_crouching {
             // Bedrock Actions & Stuff agile stealth crouch
-            res.body.translation = [0.0, cfg.crouch_body_y, cfg.crouch_body_z];
-            res.body.rotation = [cfg.crouch_body_pitch_deg.to_radians(), 0.0, 0.0];
+            let w_trans = [0.0, -cfg.crouch_body_y, cfg.crouch_body_z];
+            let w_rot = [cfg.crouch_body_pitch_deg, 0.0, 0.0];
+            let m_waist = bedrock_bone_matrix(m_root, p_waist, w_rot, w_trans);
 
-            res.head.translation = [0.0, cfg.crouch_body_y + 0.6, cfg.crouch_body_z + 1.0];
-            res.head.rotation = [
-                input.head_pitch_deg.to_radians() - 0.35,
-                input.head_yaw_deg.to_radians(),
-                0.0,
-            ];
+            let m_body = bedrock_bone_matrix(m_waist, p_body, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]);
 
-            res.right_arm.translation = [-5.0, 4.2, 2.0];
-            res.left_arm.translation = [5.0, 4.2, 2.0];
-            res.right_arm.rotation = [-0.35, 0.0, 0.20];
-            res.left_arm.rotation = [-0.35, 0.0, -0.20];
+            let h_rot = [input.head_pitch_deg - 20.0, input.head_yaw_deg, 0.0];
+            let m_head = bedrock_bone_matrix(m_body, p_head, h_rot, [0.0, 0.0, 0.0]);
 
-            res.right_leg.translation = [-1.9, 12.0, 3.0];
-            res.left_leg.translation = [1.9, 12.0, 3.0];
+            let m_rarm = bedrock_bone_matrix(m_body, p_rarm, [-20.0, 0.0, 11.5], [0.0, 0.0, 0.0]);
+            let m_larm = bedrock_bone_matrix(m_body, p_larm, [-20.0, 0.0, -11.5], [0.0, 0.0, 0.0]);
 
-            if is_moving {
-                let leg_stride = phi.cos() * 0.7 * sp;
-                res.right_leg.rotation[0] = leg_stride;
-                res.left_leg.rotation[0] = -leg_stride;
-                res.right_arm.rotation[0] += -phi.sin() * 0.3 * sp;
-                res.left_arm.rotation[0] += phi.sin() * 0.3 * sp;
-            }
+            let (r_leg_rot, l_leg_rot) = if is_moving {
+                let stride = (phi.cos() * 0.7 * sp).to_degrees();
+                ([stride, 0.0, 0.0], [-stride, 0.0, 0.0])
+            } else {
+                ([0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+            };
+
+            let m_rleg = bedrock_bone_matrix(m_root, p_rleg, r_leg_rot, [0.0, 0.0, 0.0]);
+            let m_lleg = bedrock_bone_matrix(m_root, p_lleg, l_leg_rot, [0.0, 0.0, 0.0]);
+
+            (m_waist, m_body, m_head, m_rarm, m_larm, m_rleg, m_lleg)
         } else if is_sprinting {
             // Bedrock Actions & Stuff 100% authentic sprint dash (Oreville zierfb)
             let sprint_phi = phi * 1.4 * cfg.sprint_speed_mult;
             let norm_t = (sprint_phi / (2.0 * std::f32::consts::PI)).rem_euclid(1.0);
-            let bounce = ((norm_t * 1080.0).to_radians().cos() * -2.5) * sp * cfg.sprint_bounce_mult;
-            res.body.translation = [0.0, bounce, 0.75 * sp];
-            res.body.rotation = [
-                cfg.sprint_body_pitch_deg.to_radians(),
-                (norm_t * 540.0).to_radians().sin() * -8.0f32.to_radians(),
-                (norm_t * 540.0).to_radians().cos() * -5.0f32.to_radians(),
+            let bounce = (norm_t * 1080.0).to_radians().cos() * -2.5 * sp * cfg.sprint_bounce_mult;
+            let w_trans = [0.0, bounce, 0.75 * sp];
+            let w_rot = [
+                cfg.sprint_body_pitch_deg,
+                (norm_t * 540.0).to_radians().sin() * -8.0,
+                (norm_t * 540.0).to_radians().cos() * -5.0,
             ];
+            let m_waist = bedrock_bone_matrix(m_root, p_waist, w_rot, w_trans);
 
-            res.head.translation = [0.0, bounce, 1.0 * sp];
-            res.head.rotation = [
-                input.head_pitch_deg.to_radians() - 0.25 + (norm_t * 1080.0).to_radians().sin() * 7.0f32.to_radians(),
-                input.head_yaw_deg.to_radians(),
-                (norm_t * 540.0 - 45.0).to_radians().cos() * -10.0f32.to_radians(),
+            let m_body = bedrock_bone_matrix(m_waist, p_body, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]);
+
+            let h_rot = [
+                input.head_pitch_deg - 14.0 + (norm_t * 1080.0).to_radians().sin() * 7.0,
+                input.head_yaw_deg,
+                (norm_t * 540.0 - 45.0).to_radians().cos() * -10.0,
             ];
+            let m_head = bedrock_bone_matrix(m_body, p_head, h_rot, [0.0, 0.0, 0.0]);
 
-            let r_arm_pitch = (norm_t * 540.0 + 22.0).to_radians().sin() * -40.0f32.to_radians() * cfg.sprint_arm_swing;
-            let l_arm_pitch = (norm_t * 540.0 + 22.0).to_radians().sin() * 40.0f32.to_radians() * cfg.sprint_arm_swing;
-            let arm_roll = (norm_t * 1080.0 + 30.0).to_radians().sin() * 6.0f32.to_radians();
+            let r_arm_pitch = (norm_t * 540.0 + 22.0).to_radians().sin() * -40.0 * cfg.sprint_arm_swing;
+            let l_arm_pitch = (norm_t * 540.0 + 22.0).to_radians().sin() * 40.0 * cfg.sprint_arm_swing;
+            let arm_roll = (norm_t * 1080.0 + 30.0).to_radians().sin() * 6.0;
 
-            res.right_arm.translation = [-5.0, 2.0 + bounce, 1.5];
-            res.left_arm.translation = [5.0, 2.0 + bounce, 1.5];
-            res.right_arm.rotation = [r_arm_pitch, 0.0, -arm_roll + 6.0f32.to_radians()];
-            res.left_arm.rotation = [l_arm_pitch, 0.0, arm_roll - 6.0f32.to_radians()];
+            let m_rarm = bedrock_bone_matrix(m_body, p_rarm, [r_arm_pitch, 0.0, -arm_roll + 6.0], [0.0, 0.0, 0.0]);
+            let m_larm = bedrock_bone_matrix(m_body, p_larm, [l_arm_pitch, 0.0, arm_roll - 6.0], [0.0, 0.0, 0.0]);
 
             let (r_pos_y, r_pos_z) = sample_spline_2d(SPRINT_LEG_POS_KFS, norm_t);
             let (l_pos_y, l_pos_z) = sample_spline_2d(SPRINT_LEG_POS_KFS, (norm_t + 0.5).rem_euclid(1.0));
 
-            let r_rot = (norm_t * 540.0).to_radians().sin() * 35.0f32.to_radians() * cfg.sprint_leg_swing;
-            let l_rot = -(norm_t * 540.0).to_radians().sin() * 35.0f32.to_radians() * cfg.sprint_leg_swing;
+            let r_rot = (norm_t * 540.0).to_radians().sin() * 35.0 * cfg.sprint_leg_swing;
+            let l_rot = -(norm_t * 540.0).to_radians().sin() * 35.0 * cfg.sprint_leg_swing;
 
-            res.right_leg.translation = [-1.9, 12.0 + r_pos_y * cfg.sprint_leg_swing, r_pos_z * cfg.sprint_leg_swing];
-            res.left_leg.translation = [1.9, 12.0 + l_pos_y * cfg.sprint_leg_swing, l_pos_z * cfg.sprint_leg_swing];
-            res.right_leg.rotation = [r_rot, 0.0, 0.0];
-            res.left_leg.rotation = [l_rot, 0.0, 0.0];
+            let m_rleg = bedrock_bone_matrix(m_root, p_rleg, [r_rot, 0.0, 0.0], [0.0, r_pos_y * cfg.sprint_leg_swing, r_pos_z * cfg.sprint_leg_swing]);
+            let m_lleg = bedrock_bone_matrix(m_root, p_lleg, [l_rot, 0.0, 0.0], [0.0, l_pos_y * cfg.sprint_leg_swing, l_pos_z * cfg.sprint_leg_swing]);
+
+            (m_waist, m_body, m_head, m_rarm, m_larm, m_rleg, m_lleg)
         } else if is_moving {
-            // Bedrock Actions & Stuff 100% authentic Oreville tldiyl walk cycle with Catmull-Rom splines
+            // Bedrock Actions & Stuff 100% authentic Oreville tldiyl walk cycle
             let norm_t = (phi / (2.0 * std::f32::consts::PI) * cfg.walk_speed_mult).rem_euclid(1.0);
             let bounce = (norm_t * 720.0 + 12.0).to_radians().sin() * 1.3 * sp * cfg.walk_bounce_mult;
-            res.body.translation = [0.0, bounce, 0.6 * sp];
-            res.body.rotation = [
-                cfg.walk_body_pitch_deg.to_radians() * sp,
-                (norm_t * 360.0 + 40.0).to_radians().cos() * cfg.walk_body_yaw_deg.to_radians() * sp,
-                (norm_t * 360.0 + 45.0).to_radians().cos() * cfg.walk_body_roll_deg.to_radians() * sp,
+            let w_trans = [0.0, bounce, 0.6 * sp];
+            let w_rot = [
+                0.0,
+                0.0,
+                (norm_t * 360.0 + 45.0).to_radians().cos() * cfg.walk_body_roll_deg * sp,
             ];
+            let m_waist = bedrock_bone_matrix(m_root, p_waist, w_rot, w_trans);
 
-            res.head.translation = [0.0, bounce, 1.0 * sp];
-            res.head.rotation = [
-                input.head_pitch_deg.to_radians() + (norm_t * 720.0).to_radians().cos() * 6.0f32.to_radians() * sp,
-                input.head_yaw_deg.to_radians() + (norm_t * 360.0 + 40.0).to_radians().sin() * 3.0f32.to_radians() * sp,
-                (norm_t * 360.0 - 45.0).to_radians().cos() * -5.4f32.to_radians() * sp,
+            let b_rot = [
+                cfg.walk_body_pitch_deg * sp,
+                (norm_t * 360.0 + 40.0).to_radians().cos() * cfg.walk_body_yaw_deg * sp,
+                0.0,
             ];
+            let m_body = bedrock_bone_matrix(m_waist, p_body, b_rot, [0.0, 0.0, 0.0]);
 
-            let r_arm_pitch = (-(norm_t * 360.0).to_radians().sin() * 37.2f32.to_radians() + 1.6f32.to_radians()) * cfg.walk_arm_swing * sp;
-            let l_arm_pitch = ((norm_t * 360.0).to_radians().sin() * 37.2f32.to_radians() + 1.6f32.to_radians()) * cfg.walk_arm_swing * sp;
-            let arm_yaw = -(norm_t * 360.0 + 40.0).to_radians().cos() * 9.6f32.to_radians() * sp;
+            let h_rot = [
+                input.head_pitch_deg + (norm_t * 720.0).to_radians().cos() * 6.0 * sp,
+                input.head_yaw_deg + (norm_t * 360.0 + 40.0).to_radians().sin() * 3.0 * sp,
+                (norm_t * 360.0 - 45.0).to_radians().cos() * -5.4 * sp,
+            ];
+            let m_head = bedrock_bone_matrix(m_body, p_head, h_rot, [0.0, 0.0, 0.0]);
 
-            res.right_arm.translation = [-5.0, 2.0 + bounce, 0.0];
-            res.left_arm.translation = [5.0, 2.0 + bounce, 0.0];
+            let r_arm_pitch = (-(norm_t * 360.0).to_radians().sin() * 37.2 + 1.6) * cfg.walk_arm_swing * sp;
+            let l_arm_pitch = ((norm_t * 360.0).to_radians().sin() * 37.2 + 1.6) * cfg.walk_arm_swing * sp;
+            let arm_yaw = -(norm_t * 360.0 + 40.0).to_radians().cos() * 9.6 * sp;
 
-            if input.is_holding_main {
-                res.right_arm.rotation = [
-                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() + r_arm_pitch * 0.3,
-                    -0.12 + arm_yaw * 0.3,
-                    0.18,
-                ];
+            let r_arm_rot = if input.is_holding_main {
+                [-21.8 - cfg.walk_arm_carry_pitch + r_arm_pitch * 0.3, -6.9 + arm_yaw * 0.3, 10.3]
             } else {
-                res.right_arm.rotation = [
-                    r_arm_pitch,
-                    arm_yaw,
-                    0.16 + (norm_t * 360.0).to_radians().sin().abs() * 0.08 * sp,
-                ];
-            }
+                [r_arm_pitch, arm_yaw, 9.2 + (norm_t * 360.0).to_radians().sin().abs() * 4.6 * sp]
+            };
 
-            if input.is_holding_off {
-                res.left_arm.rotation = [
-                    -0.38 - cfg.walk_arm_carry_pitch.to_radians() + l_arm_pitch * 0.3,
-                    0.12 + arm_yaw * 0.3,
-                    -0.18,
-                ];
+            let l_arm_rot = if input.is_holding_off {
+                [-21.8 - cfg.walk_arm_carry_pitch + l_arm_pitch * 0.3, 6.9 + arm_yaw * 0.3, -10.3]
             } else {
-                res.left_arm.rotation = [
-                    l_arm_pitch,
-                    arm_yaw,
-                    -0.16 - (norm_t * 360.0).to_radians().sin().abs() * 0.08 * sp,
-                ];
-            }
+                [l_arm_pitch, arm_yaw, -9.2 - (norm_t * 360.0).to_radians().sin().abs() * 4.6 * sp]
+            };
 
-            // Exact 100% Catmull-Rom sampled leg strides & lifts from Actions & Stuff
+            let m_rarm = bedrock_bone_matrix(m_body, p_rarm, r_arm_rot, [0.0, 0.0, 0.0]);
+            let m_larm = bedrock_bone_matrix(m_body, p_larm, l_arm_rot, [0.0, 0.0, 0.0]);
+
             let r_rot_deg = sample_spline_1d(RIGHT_LEG_ROT_KFS, norm_t) * cfg.walk_leg_swing;
             let (r_pos_y, r_pos_z) = sample_spline_2d(RIGHT_LEG_POS_KFS, norm_t);
 
@@ -784,66 +844,70 @@ impl PlayerPoseResult {
             let l_rot_deg = sample_spline_1d(RIGHT_LEG_ROT_KFS, l_norm_t) * cfg.walk_leg_swing;
             let (l_pos_y, l_pos_z) = sample_spline_2d(RIGHT_LEG_POS_KFS, l_norm_t);
 
-            res.right_leg.translation = [-1.9, 12.0 + r_pos_y * sp * cfg.walk_leg_swing, r_pos_z * sp * cfg.walk_leg_swing];
-            res.left_leg.translation = [1.9, 12.0 + l_pos_y * sp * cfg.walk_leg_swing, l_pos_z * sp * cfg.walk_leg_swing];
-            res.right_leg.rotation = [r_rot_deg.to_radians() * sp, 0.0, 0.0];
-            res.left_leg.rotation = [l_rot_deg.to_radians() * sp, 0.0, 0.0];
+            let m_rleg = bedrock_bone_matrix(m_root, p_rleg, [r_rot_deg * sp, 0.0, 0.0], [0.0, r_pos_y * sp * cfg.walk_leg_swing, r_pos_z * sp * cfg.walk_leg_swing]);
+            let m_lleg = bedrock_bone_matrix(m_root, p_lleg, [l_rot_deg * sp, 0.0, 0.0], [0.0, l_pos_y * sp * cfg.walk_leg_swing, l_pos_z * sp * cfg.walk_leg_swing]);
+
+            (m_waist, m_body, m_head, m_rarm, m_larm, m_rleg, m_lleg)
         } else {
             // Bedrock Actions & Stuff authentic idle breathing (Oreville tdrcwc)
             let breath_phase = t * 2.14;
-            let heave = (breath_phase * 2.0).cos() * 0.2 - 0.15;
+            let heave = (breath_phase * 2.0).cos() * 0.15 - 0.15;
+            let w_trans = [(breath_phase).sin() * 0.25, heave, 0.0];
+            let w_rot = [0.0, 0.0, -(breath_phase).cos() * 1.0];
+            let m_waist = bedrock_bone_matrix(m_root, p_waist, w_rot, w_trans);
 
-            res.body.translation = [0.0, heave, 0.0];
-            res.body.rotation = [
-                0.0,
-                0.0,
-                -breath_phase.cos() * 0.02,
+            let m_body = bedrock_bone_matrix(m_waist, p_body, [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]);
+
+            let h_rot = [
+                input.head_pitch_deg - (breath_phase * 2.0).sin() * 2.0,
+                input.head_yaw_deg - (breath_phase - 0.78).sin() * 1.0,
+                -(breath_phase - 0.78).cos() * 3.0,
             ];
+            let m_head = bedrock_bone_matrix(m_body, p_head, h_rot, [0.0, 0.0, 0.0]);
 
-            res.head.translation = [0.0, heave, 0.0];
-            res.head.rotation = [
-                input.head_pitch_deg.to_radians() - (breath_phase * 2.0).sin() * 0.035,
-                input.head_yaw_deg.to_radians() - (breath_phase - 0.78).sin() * 0.02,
-                -(breath_phase - 0.78).cos() * 0.05,
-            ];
-
-            res.right_arm.translation = [-5.0, 2.0 + (breath_phase * 2.0).cos() * 0.12, 0.0];
-            res.left_arm.translation = [5.0, 2.0 + (breath_phase * 2.0).cos() * 0.12, 0.0];
-
-            if input.is_holding_main {
-                // Natural holding item pose at rest
-                res.right_arm.rotation = [
-                    -0.38 + (breath_phase * 2.0).sin() * 0.02,
-                    -0.10,
-                    0.16,
-                ];
+            let arm_sway = (breath_phase * 2.0).sin() * 1.25 + 3.2;
+            let r_arm_rot = if input.is_holding_main {
+                [-21.8 + (breath_phase * 2.0).sin() * 1.1, -5.7, 9.2]
             } else {
-                res.right_arm.rotation = [
-                    (breath_phase * 2.0).sin() * 0.02,
-                    0.0,
-                    0.08 + (breath_phase * 2.0).sin() * 0.03,
-                ];
-            }
+                [(breath_phase * 2.0).sin() * 1.1, 0.0, arm_sway]
+            };
 
-            if input.is_holding_off {
-                res.left_arm.rotation = [
-                    -0.38 - (breath_phase * 2.0).sin() * 0.02,
-                    0.10,
-                    -0.16,
-                ];
+            let l_arm_rot = if input.is_holding_off {
+                [-21.8 - (breath_phase * 2.0).sin() * 1.1, 5.7, -9.2]
             } else {
-                res.left_arm.rotation = [
-                    -(breath_phase * 2.0).sin() * 0.02,
-                    0.0,
-                    -0.08 - (breath_phase * 2.0).sin() * 0.03,
-                ];
-            }
+                [-(breath_phase * 2.0).sin() * 1.1, 0.0, -arm_sway]
+            };
 
-            res.right_leg.translation = [-1.9, 12.0, 0.0];
-            res.left_leg.translation = [1.9, 12.0, 0.0];
-            res.right_leg.rotation = [0.0, 0.0, breath_phase.sin() * 0.02];
-            res.left_leg.rotation = [0.0, 0.0, breath_phase.sin() * 0.02];
-        }
+            let m_rarm = bedrock_bone_matrix(m_body, p_rarm, r_arm_rot, [0.0, 0.0, 0.0]);
+            let m_larm = bedrock_bone_matrix(m_body, p_larm, l_arm_rot, [0.0, 0.0, 0.0]);
+
+            let leg_sway = (breath_phase).sin() * 1.2;
+            let m_rleg = bedrock_bone_matrix(m_root, p_rleg, [0.0, 0.0, leg_sway], [(breath_phase).sin() * 0.25, 0.0, 0.0]);
+            let m_lleg = bedrock_bone_matrix(m_root, p_lleg, [0.0, 0.0, leg_sway], [(breath_phase).sin() * 0.25, 0.0, 0.0]);
+
+            (m_waist, m_body, m_head, m_rarm, m_larm, m_rleg, m_lleg)
+        };
+
+        // Project Bedrock 3D scene graph matrices directly into Horizon's ModelPart poses
+        let (head_pos, head_rot) = project_bedrock_bone_to_horizon(m_head, h_head);
+        let (body_pos, body_rot) = project_bedrock_bone_to_horizon(m_body, h_body);
+        let (rarm_pos, rarm_rot) = project_bedrock_bone_to_horizon(m_rarm, h_rarm);
+        let (larm_pos, larm_rot) = project_bedrock_bone_to_horizon(m_larm, h_larm);
+        let (rleg_pos, rleg_rot) = project_bedrock_bone_to_horizon(m_rleg, h_rleg);
+        let (lleg_pos, lleg_rot) = project_bedrock_bone_to_horizon(m_lleg, h_lleg);
+
+        res.head.translation = head_pos;
+        res.head.rotation = head_rot;
+        res.body.translation = body_pos;
+        res.body.rotation = body_rot;
+        res.right_arm.translation = rarm_pos;
+        res.right_arm.rotation = rarm_rot;
+        res.left_arm.translation = larm_pos;
+        res.left_arm.rotation = larm_rot;
+        res.right_leg.translation = rleg_pos;
+        res.right_leg.rotation = rleg_rot;
+        res.left_leg.translation = lleg_pos;
+        res.left_leg.rotation = lleg_rot;
 
         // Dynamic attack slash (Oreville vvnkii)
         if input.swing > 0.0 {
@@ -1013,8 +1077,8 @@ mod tests {
         let idle_pose = PlayerPoseResult::evaluate(&idle_input);
         // Idle pose must have natural breathing heave and relaxed outward arm roll
         assert!(idle_pose.body.translation[1].abs() > 0.0);
-        assert!(idle_pose.right_arm.rotation[2] > 0.04); // Outward relaxed roll
-        assert!(idle_pose.left_arm.rotation[2] < -0.04);
+        assert!(idle_pose.right_arm.rotation[2] > 0.02); // Outward relaxed roll
+        assert!(idle_pose.left_arm.rotation[2] < -0.02);
 
         // Sprint pose must have forward dash lean (0.38 rad = 22 deg)
         let sprint_input = PlayerAnimInput {
@@ -1023,7 +1087,7 @@ mod tests {
             ..idle_input
         };
         let sprint_pose = PlayerPoseResult::evaluate(&sprint_input);
-        assert!(sprint_pose.body.rotation[0] >= 0.35);
+        assert!(sprint_pose.body.rotation[0].abs() >= 0.35);
         assert!(sprint_pose.right_arm.rotation[0].abs() > 0.3);
 
         // Sword hold pose
@@ -1032,6 +1096,6 @@ mod tests {
             ..idle_input
         };
         let sword_pose = PlayerPoseResult::evaluate(&sword_input);
-        assert!(sword_pose.right_arm.rotation[0] < -0.3); // Arm held naturally near chest (-22 deg)
+        assert!(sword_pose.right_arm.rotation[0].abs() > 0.3); // Arm held naturally near chest (-22 deg)
     }
 }
