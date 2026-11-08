@@ -291,3 +291,22 @@ pub fn get_live_config() -> RustanimConfig {
 
     RustanimConfig::default()
 }
+
+/// Saves the configuration to the active config path and updates the in-memory cache.
+pub fn save_live_config(cfg: &RustanimConfig) -> std::io::Result<()> {
+    let path = resolve_config_path();
+    if let Some(parent) = path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+    let json = serde_json::to_string_pretty(cfg)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+    fs::write(&path, json)?;
+    if let Ok(meta) = fs::metadata(&path) {
+        if let Ok(mtime) = meta.modified() {
+            if let Ok(mut guard) = LIVE_CONFIG.write() {
+                *guard = Some((cfg.clone(), mtime));
+            }
+        }
+    }
+    Ok(())
+}
