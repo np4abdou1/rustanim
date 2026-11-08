@@ -163,6 +163,50 @@ impl BedrockModel {
         let r_pivot_x = if is_slim { -4.5 } else { -5.0 };
         let l_pivot_x = if is_slim { 4.5 } else { 5.0 };
 
+        let mut body_cubes = vec![
+            // Torso
+            BedrockCube {
+                origin: [-4.0, 12.0, -2.0],
+                size: [8.0, 12.0, 4.0],
+                uv: Some(CubeUv::Box([16.0, 16.0])),
+                inflate: None,
+                mirror: None,
+                pivot: None,
+                rotation: None,
+            },
+            // Jacket
+            BedrockCube {
+                origin: [-4.0, 12.0, -2.0],
+                size: [8.0, 12.0, 4.0],
+                uv: Some(CubeUv::Box([16.0, 32.0])),
+                inflate: Some(0.25),
+                mirror: None,
+                pivot: None,
+                rotation: None,
+            },
+        ];
+        if is_slim {
+            // Actions & Stuff 3D Backpack attached to back of torso
+            body_cubes.push(BedrockCube {
+                origin: [-3.0, 13.0, 2.2],
+                size: [6.0, 7.5, 3.5],
+                uv: Some(CubeUv::Box([20.0, 36.0])),
+                inflate: Some(0.1),
+                mirror: None,
+                pivot: None,
+                rotation: None,
+            });
+            body_cubes.push(BedrockCube {
+                origin: [-2.5, 19.5, 2.4],
+                size: [5.0, 2.0, 3.2],
+                uv: Some(CubeUv::Box([20.0, 36.0])),
+                inflate: Some(0.15),
+                mirror: None,
+                pivot: None,
+                rotation: None,
+            });
+        }
+
         let bones = vec![
             BedrockBone {
                 name: "root".into(),
@@ -195,28 +239,7 @@ impl BedrockModel {
                 rotation: None,
                 bind_pose_rotation: None,
                 binding: None,
-                cubes: vec![
-                    // Torso
-                    BedrockCube {
-                        origin: [-4.0, 12.0, -2.0],
-                        size: [8.0, 12.0, 4.0],
-                        uv: Some(CubeUv::Box([16.0, 16.0])),
-                        inflate: None,
-                        mirror: None,
-                        pivot: None,
-                        rotation: None,
-                    },
-                    // Jacket
-                    BedrockCube {
-                        origin: [-4.0, 12.0, -2.0],
-                        size: [8.0, 12.0, 4.0],
-                        uv: Some(CubeUv::Box([16.0, 32.0])),
-                        inflate: Some(0.25),
-                        mirror: None,
-                        pivot: None,
-                        rotation: None,
-                    },
-                ],
+                cubes: body_cubes,
                 locators: HashMap::new(),
                 neverrender: None,
                 reset: None,
@@ -732,27 +755,27 @@ pub fn generate_cube_vertices(
 
             // North (Z-)
             if let Some(uvs) = get_uvs(north) {
-                push_quad([p110, p010, p000, p100], uvs);
+                push_quad([p010, p110, p100, p000], uvs);
             }
             // South (Z+)
             if let Some(uvs) = get_uvs(south) {
-                push_quad([p011, p111, p101, p001], uvs);
+                push_quad([p111, p011, p001, p101], uvs);
             }
             // West (X-)
             if let Some(uvs) = get_uvs(west) {
-                push_quad([p010, p011, p001, p000], uvs);
+                push_quad([p011, p010, p000, p001], uvs);
             }
             // East (X+)
             if let Some(uvs) = get_uvs(east) {
-                push_quad([p111, p110, p100, p101], uvs);
+                push_quad([p110, p111, p101, p100], uvs);
             }
             // Up (Y+)
             if let Some(uvs) = get_uvs(up) {
-                push_quad([p011, p010, p110, p111], uvs);
+                push_quad([p011, p111, p110, p010], uvs);
             }
             // Down (Y-)
             if let Some(uvs) = get_uvs(down) {
-                push_quad([p000, p001, p101, p100], uvs);
+                push_quad([p000, p100, p101, p001], uvs);
             }
         }
         Some(CubeUv::Box([u0, v0])) => {
@@ -762,13 +785,13 @@ pub fn generate_cube_vertices(
             let dy = s.y;
             let dz = s.z;
 
-            // Box UV layout:
-            // West: [u0, v0 + dz] to [u0 + dz, v0 + dz + dy]
+            // Box UV layout (matching vanilla Minecraft and Bedrock):
+            // East:  [u0, v0 + dz] to [u0 + dz, v0 + dz + dy]
             // North: [u0 + dz, v0 + dz] to [u0 + dz + dx, v0 + dz + dy]
-            // East: [u0 + dz + dx, v0 + dz] to [u0 + 2*dz + dx, v0 + dz + dy]
+            // West:  [u0 + dz + dx, v0 + dz] to [u0 + 2*dz + dx, v0 + dz + dy]
             // South: [u0 + 2*dz + dx, v0 + dz] to [u0 + 2*dz + 2*dx, v0 + dz + dy]
-            // Up: [u0 + dz, v0] to [u0 + dz + dx, v0 + dz]
-            // Down: [u0 + dz + dx, v0] to [u0 + dz + 2*dx, v0 + dz]
+            // Up:    [u0 + dz, v0] to [u0 + dz + dx, v0 + dz]
+            // Down:  [u0 + dz + dx, v0] to [u0 + dz + 2*dx, v0 + dz]
 
             let to_uv = |u: f32, v: f32, du: f32, dv: f32| -> [[f32; 2]; 4] {
                 let u_a = u / tex_w;
@@ -778,29 +801,29 @@ pub fn generate_cube_vertices(
                 [[u_a, v_a], [u_b, v_a], [u_b, v_b], [u_a, v_b]]
             };
 
-            // North
+            // North (-Z, front)
             let uvs_n = to_uv(u0 + dz, v0 + dz, dx, dy);
-            push_quad([p110, p010, p000, p100], uvs_n);
+            push_quad([p010, p110, p100, p000], uvs_n);
 
-            // South
+            // South (+Z, back)
             let uvs_s = to_uv(u0 + 2.0 * dz + dx, v0 + dz, dx, dy);
-            push_quad([p011, p111, p101, p001], uvs_s);
+            push_quad([p111, p011, p001, p101], uvs_s);
 
-            // West
-            let uvs_w = to_uv(u0, v0 + dz, dz, dy);
-            push_quad([p010, p011, p001, p000], uvs_w);
+            // West (+X in Java)
+            let uvs_w = to_uv(u0 + dz + dx, v0 + dz, dz, dy);
+            push_quad([p011, p010, p000, p001], uvs_w);
 
-            // East
-            let uvs_e = to_uv(u0 + dz + dx, v0 + dz, dz, dy);
-            push_quad([p111, p110, p100, p101], uvs_e);
+            // East (-X in Java)
+            let uvs_e = to_uv(u0, v0 + dz, dz, dy);
+            push_quad([p110, p111, p101, p100], uvs_e);
 
-            // Up
+            // Up (top)
             let uvs_u = to_uv(u0 + dz, v0, dx, dz);
-            push_quad([p011, p010, p110, p111], uvs_u);
+            push_quad([p011, p111, p110, p010], uvs_u);
 
-            // Down
+            // Down (bottom)
             let uvs_d = to_uv(u0 + dz + dx, v0, dx, dz);
-            push_quad([p000, p001, p101, p100], uvs_d);
+            push_quad([p000, p100, p101, p001], uvs_d);
         }
         None => {
             let u0 = 0.0;
