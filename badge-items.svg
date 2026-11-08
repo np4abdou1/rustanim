@@ -1,15 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="122" height="20">
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="20">
 <linearGradient id="b" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
-<mask id="a"><rect width="122" height="20" rx="3" fill="#fff"/></mask>
+<mask id="a"><rect width="108" height="20" rx="3" fill="#fff"/></mask>
 <g mask="url(#a)">
 <path fill="#555" d="M0 0h68v20H0z"/>
-<path fill="#2ea043" d="M68 0h54v20H68z"/>
-<path fill="url(#b)" d="M0 0h122v20H0z"/>
+<path fill="#e3b341" d="M68 0h40v20H68z"/>
+<path fill="url(#b)" d="M0 0h108v20H0z"/>
 </g>
 <g fill="#fff" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" font-size="11">
 <text x="34.0" y="15" fill="#010101" fill-opacity=".3">3d items</text>
 <text x="34.0" y="14">3d items</text>
-<text x="95.0" y="15" fill="#010101" fill-opacity=".3">100.0%</text>
-<text x="95.0" y="14">100.0%</text>
+<text x="88.0" y="15" fill="#010101" fill-opacity=".3">0.0%</text>
+<text x="88.0" y="14">0.0%</text>
 </g>
 </svg>
