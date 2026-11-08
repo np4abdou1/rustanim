@@ -666,7 +666,8 @@ fn project_bedrock_bone_to_horizon(m_bedrock: glam::Mat4, h_pivot: glam::Vec3) -
     let t_p = glam::Mat4::from_translation(h_pivot);
     let m_prime = t_np * m_h * t_p;
 
-    let pos = m_prime.w_axis.truncate().to_array();
+    let delta = m_prime.w_axis.truncate();
+    let pos = (h_pivot + delta).to_array();
 
     // Extract exact ZYX Euler angles from rotation matrix
     let r20 = m_prime.col(0).z;
