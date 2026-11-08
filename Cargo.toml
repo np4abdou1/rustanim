@@ -10,7 +10,7 @@ repository = "https://github.com/np4abdou1/rustanim"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-glam = { version = "0.28", features = ["serde"] }
+glam = { version = "0.30", features = ["serde"] }
 smallvec = "1.13"
 zip = { version = "2.2", default-features = false, features = ["deflate"] }
 
